@@ -45,4 +45,25 @@ export class TournamentsController {
   ) {
     return this.tournamentsService.joinTournament(req.user.sub, id, dto);
   }
+
+  @Get(':id/fixtures')
+  getTournamentFixtures(@Param('id') id: string) {
+    return this.tournamentsService.getTournamentFixtures(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('fixtures/:fixtureId/score')
+  submitFixtureScore(
+    @Request() req: any,
+    @Param('fixtureId') fixtureId: string,
+    @Body() body: { player1Score: number; player2Score: number },
+  ) {
+    return this.tournamentsService.submitFixtureResult(
+      req.user.sub,
+      fixtureId,
+      Number(body.player1Score),
+      Number(body.player2Score),
+    );
+  }
 }
+

@@ -128,6 +128,27 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ selectedTeam }),
     }),
+  getTournamentFixtures: (tournamentId: string) =>
+    apiRequest(`/tournaments/${tournamentId}/fixtures`),
+  submitFixtureScore: (fixtureId: string, player1Score: number, player2Score: number) =>
+    apiRequest(`/tournaments/fixtures/${fixtureId}/score`, {
+      method: 'POST',
+      body: JSON.stringify({ player1Score, player2Score }),
+    }),
+
+  // Support Tickets
+  createSupportTicket: (data: { subject: string; category?: string; message: string; matchId?: string }) =>
+    apiRequest('/support/tickets', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  getMySupportTickets: () => apiRequest('/support/my-tickets'),
+  getAllSupportTickets: () => apiRequest('/support/all-tickets'),
+  respondSupportTicket: (ticketId: string, adminResponse: string, status?: string) =>
+    apiRequest(`/support/tickets/${ticketId}/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ adminResponse, status }),
+    }),
 
   // Leaderboard
   getLeaderboard: (platform?: string) =>

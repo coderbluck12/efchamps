@@ -402,49 +402,286 @@ export function LeaderboardView() {
 }
 
 export function SupportView() {
+  const { user } = useAuth();
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loadingTickets, setLoadingTickets] = useState<boolean>(true);
+  const [showNewTicketModal, setShowNewTicketModal] = useState<boolean>(false);
+  const [ticketSubject, setTicketSubject] = useState<string>("");
+  const [ticketCategory, setTicketCategory] = useState<string>("Payment & withdrawals");
+  const [ticketMessage, setTicketMessage] = useState<string>("");
+  const [submittingTicket, setSubmittingTicket] = useState<boolean>(false);
+  const [selectedFaq, setSelectedFaq] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const fetchTickets = () => {
+    setLoadingTickets(true);
+    api.getMySupportTickets()
+      .then((data: any) => {
+        if (Array.isArray(data)) setTickets(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingTickets(false));
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const handleCreateTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ticketSubject.trim() || !ticketMessage.trim() || submittingTicket) return;
+    try {
+      setSubmittingTicket(true);
+      await api.createSupportTicket({
+        subject: ticketSubject.trim(),
+        category: ticketCategory,
+        message: ticketMessage.trim(),
+      });
+      setTicketSubject("");
+      setTicketMessage("");
+      setShowNewTicketModal(false);
+      fetchTickets();
+      alert("Your support ticket has been submitted. An arbiter will review and respond shortly.");
+    } catch (err: any) {
+      alert(err.message || "Failed to create support ticket");
+    } finally {
+      setSubmittingTicket(false);
+    }
+  };
+
+  const faqs: Record<string, { title: string; content: string }> = {
+    "Report a match result": {
+      title: "How to Report Match Results & Handle Disconnects",
+      content: "After your 1v1 match concludes, navigate to your Match Room and enter your goals scored and result (Won, Draw, Lost). If an opponent disconnects or goes idle, efChamps' automated match timer forfeit system awards you the victory once the match timer plus forfeit grace period expires. Keep clear uncropped screenshots of the final whistle score.",
+    },
+    "Payment & withdrawals": {
+      title: "Deposits, Minimums & Bank Withdrawals",
+      content: "Deposits are processed instantly in Nigerian Naira via Paystack (Debit Cards, Bank Transfer, USSD). The minimum deposit amount is strictly ₦1,000. Withdrawals to all commercial banks (GTBank, Zenith, Access, Kuda, OPay, PalmPay) are processed instantly or within 10 minutes with zero hidden processing fees.",
+    },
+    "Account security": {
+      title: "Protecting Your efChamps & Konami ID",
+      content: "Never share your efChamps password. Ensure your in-game Konami ID / PSN / Xbox Gamertag matches your profile. If you notice unauthorized activity or change devices, contact support immediately to lock your escrow balances.",
+    },
+    "Fair play & disputes": {
+      title: "Score Disputes & Evidence Requirements",
+      content: "If both players report conflicting scores, the match enters DISPUTED state and escrow funds are frozen safely. Both players can upload up to 5 clear, uncropped post-match screenshots or videos. Admin arbiters inspect the match timestamps and award the prize pool to the legitimate winner.",
+    },
+  };
+
   return (
     <>
-      <ViewHeading copy="Fast answers for match, wallet, and account questions." eyebrow="Average response • 4 min" title="Player support" />
+      <ViewHeading
+        action={
+          <div className="flex items-center gap-3">
+            <a
+              href="https://wa.me/2348000000000?text=Hello%20efChamps%20Support,%20I%20need%20assistance%20with%20my%20match"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-10 items-center gap-2 rounded-lg border border-[#25D366]/40 bg-[#25D366]/10 px-4 text-xs font-bold text-[#25D366] transition hover:bg-[#25D366]/20"
+            >
+              <span>WhatsApp Arbiter</span>
+            </a>
+            <Button className="h-10 px-4 text-xs" onClick={() => setShowNewTicketModal(true)}>
+              + Open Ticket
+            </Button>
+          </div>
+        }
+        copy="Fast answers for match, wallet, escrow, and account questions."
+        eyebrow="Average response • 4 min"
+        title="Player support & arbitration"
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_.85fr] gap-5">
         <div className="rounded-lg border border-[#292c32] bg-[#14161a] p-7">
-          <div className="flex size-11 items-center justify-center rounded-lg bg-[#00FF66]/10 text-[#00FF66]"><Icon name="headset" /></div>
+          <div className="flex size-11 items-center justify-center rounded-lg bg-[#00FF66]/10 text-[#00FF66]">
+            <Icon name="headset" />
+          </div>
           <h3 className="mt-6 text-2xl font-black text-white">What can we solve?</h3>
-          <p className="mt-2 text-xs text-[#747984]">Search the playbook or start a priority conversation.</p>
+          <p className="mt-2 text-xs text-[#747984]">Search knowledge base guides or open a priority dispute ticket.</p>
           <div className="mt-6 flex h-13 items-center rounded-lg border border-[#34373e] bg-[#0e1013] px-4 focus-within:border-[#00FF66]">
             <Icon name="grid" size={17} />
-            <input className="h-full flex-1 bg-transparent px-3 text-xs text-white outline-none placeholder:text-[#555a64]" placeholder="Search match rules, withdrawals, disputes..." />
+            <input
+              className="h-full flex-1 bg-transparent px-3 text-xs text-white outline-none placeholder:text-[#555a64]"
+              placeholder="Search match rules, minimum deposits, withdrawals, disputes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
+
           <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {["Report a match result", "Payment & withdrawals", "Account security", "Fair play & disputes"].map((topic) => (
-              <button className="rounded-lg border border-[#2a2d33] bg-[#101216] p-4 text-left text-xs font-semibold text-[#a2a7b0] transition hover:border-[#00FF66]/40 hover:text-white" key={topic} type="button">
-                {topic}
-                <span className="mt-3 block text-[#00FF66]">Explore →</span>
-              </button>
-            ))}
+            {Object.keys(faqs)
+              .filter((k) => !searchQuery || k.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((topic) => (
+                <button
+                  className="rounded-lg border border-[#2a2d33] bg-[#101216] p-4 text-left text-xs font-semibold text-[#a2a7b0] transition hover:border-[#00FF66]/40 hover:text-white"
+                  key={topic}
+                  type="button"
+                  onClick={() => setSelectedFaq(topic)}
+                >
+                  {topic}
+                  <span className="mt-3 block text-[#00FF66]">Read Guide →</span>
+                </button>
+              ))}
           </div>
         </div>
+
         <div className="space-y-4">
           <div className="rounded-lg border border-[#00FF66]/25 bg-[#121914] p-6">
             <div className="flex items-center gap-2 text-[#00FF66]">
               <span className="size-2 rounded-full bg-[#00FF66]" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em]">Agents online</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em]">Live Arbiters On Duty</span>
             </div>
             <h3 className="mt-5 text-xl font-black text-white">Talk to a match specialist</h3>
-            <p className="mt-2 text-xs leading-5 text-[#717a74]">Get help from someone who understands stakes, result verification, and platform rules.</p>
-            <Button className="mt-6 h-11 w-full text-xs">Start live chat</Button>
+            <p className="mt-2 text-xs leading-5 text-[#717a74]">
+              Get rapid dispute resolution from referees who verify game screenshots, Konami IDs, and match fair play rules.
+            </p>
+            <Button className="mt-6 h-11 w-full text-xs" onClick={() => setShowNewTicketModal(true)}>
+              Submit Support Ticket
+            </Button>
           </div>
+
+          {/* Active Tickets List */}
           <div className="rounded-lg border border-[#292c32] bg-[#14161a] p-6">
-            <p className="text-xs font-bold text-white">Your open ticket</p>
-            <div className="mt-4 flex items-center justify-between rounded-lg bg-[#0e1013] p-4">
-              <div>
-                <p className="text-xs font-semibold text-white">#SX-2048 • Result review</p>
-                <p className="mt-1 text-[10px] text-[#636872]">Updated 8 minutes ago</p>
-              </div>
-              <span className="rounded bg-[#f59e0b]/10 px-2 py-1 text-[9px] font-bold text-[#f59e0b]">IN REVIEW</span>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold text-white uppercase tracking-wider">Your Support Tickets</p>
+              <span className="text-[10px] text-[#747984]">{tickets.length} submitted</span>
             </div>
+
+            {loadingTickets ? (
+              <p className="text-xs text-[#717682]">Loading your tickets...</p>
+            ) : tickets.length === 0 ? (
+              <div className="rounded-lg bg-[#0e1013] p-4 text-center text-xs text-[#717682]">
+                <p>No open tickets. If you need assistance with a match or deposit, click &quot;Open Ticket&quot; above.</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                {tickets.map((t) => (
+                  <div key={t.id} className="rounded-lg border border-[#23262d] bg-[#0e1013] p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white truncate max-w-[180px]">{t.subject}</span>
+                      <span className={`rounded px-2 py-0.5 text-[8px] font-black uppercase ${
+                        t.status === "RESOLVED" ? "bg-[#00FF66]/15 text-[#00FF66]" : "bg-yellow-400/15 text-yellow-400"
+                      }`}>
+                        {t.status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8e94a1] line-clamp-2">{t.message}</p>
+                    {t.adminResponse && (
+                      <div className="mt-2 rounded border border-[#00FF66]/20 bg-[#00FF66]/5 p-2.5 text-[10px] text-[#00FF66]">
+                        <span className="font-bold">Staff Response: </span>
+                        <span>{t.adminResponse}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between text-[9px] text-[#555a66] pt-1">
+                      <span>{t.category}</span>
+                      <span>{new Date(t.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* New Ticket Modal */}
+      {showNewTicketModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-[#2b2e35] bg-[#14161a] p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#24272e] pb-4 mb-4">
+              <h3 className="text-base font-black text-white uppercase tracking-wider">Open Support Ticket</h3>
+              <button
+                type="button"
+                onClick={() => setShowNewTicketModal(false)}
+                className="text-xs font-bold text-[#717682] hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTicket} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8b909c] mb-1">
+                  Category
+                </label>
+                <select
+                  value={ticketCategory}
+                  onChange={(e) => setTicketCategory(e.target.value)}
+                  className="w-full h-11 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-xs text-white focus:border-[#00FF66] focus:outline-none"
+                >
+                  <option value="Payment & withdrawals">Payment &amp; Withdrawals (Paystack)</option>
+                  <option value="Match Result & Dispute">Match Result &amp; Dispute Arbitration</option>
+                  <option value="Tournament Issue">Tournament Issue</option>
+                  <option value="Account & Login">Account &amp; Security</option>
+                  <option value="General Question">General Inquiry</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8b909c] mb-1">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Match #1234 opponent disconnected"
+                  value={ticketSubject}
+                  onChange={(e) => setTicketSubject(e.target.value)}
+                  className="w-full h-11 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-xs text-white focus:border-[#00FF66] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8b909c] mb-1">
+                  Message Details
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Describe your issue with exact details so the arbiter can resolve it..."
+                  value={ticketMessage}
+                  onChange={(e) => setTicketMessage(e.target.value)}
+                  className="w-full rounded-lg border border-[#2b2e35] bg-[#0c0d10] p-3 text-xs text-white focus:border-[#00FF66] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button className="flex-1 h-11 text-xs" variant="secondary" onClick={() => setShowNewTicketModal(false)} type="button">
+                  Cancel
+                </Button>
+                <Button className="flex-1 h-11 text-xs" type="submit" disabled={submittingTicket}>
+                  {submittingTicket ? "Submitting..." : "Send Ticket"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* FAQ Article Modal */}
+      {selectedFaq && faqs[selectedFaq] && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-[#2b2e35] bg-[#14161a] p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#24272e] pb-3 mb-4">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#00FF66]">Knowledge Base</span>
+              <button
+                type="button"
+                onClick={() => setSelectedFaq(null)}
+                className="text-xs font-bold text-[#717682] hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <h3 className="text-lg font-black text-white">{faqs[selectedFaq].title}</h3>
+            <p className="mt-3 text-xs leading-relaxed text-[#9ca2af]">{faqs[selectedFaq].content}</p>
+            <div className="mt-6 flex justify-end">
+              <Button className="h-10 px-5 text-xs" onClick={() => setSelectedFaq(null)}>
+                Got it
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -686,16 +923,25 @@ function CreateTournamentModal({ onClose, onCreated }: { onClose: () => void; on
 function TournamentDetailView({ tournamentId, onBack }: { tournamentId: string; onBack: () => void }) {
   const { user, refreshUser } = useAuth();
   const [tournament, setTournament] = useState<any>(null);
+  const [fixtures, setFixtures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState("Manchester City");
+  const [reportingFixtureId, setReportingFixtureId] = useState<string | null>(null);
+  const [p1ScoreInput, setP1ScoreInput] = useState<number>(2);
+  const [p2ScoreInput, setP2ScoreInput] = useState<number>(1);
+  const [submittingScore, setSubmittingScore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchTournament = async () => {
     try {
       setLoading(true);
-      const data = await api.getTournamentById(tournamentId);
+      const [data, fixData] = await Promise.all([
+        api.getTournamentById(tournamentId),
+        api.getTournamentFixtures(tournamentId).catch(() => []),
+      ]);
       setTournament(data);
+      if (Array.isArray(fixData)) setFixtures(fixData);
     } catch (err: any) {
       setError(err.message || "Failed to load tournament");
     } finally {
@@ -722,6 +968,21 @@ function TournamentDetailView({ tournamentId, onBack }: { tournamentId: string; 
     }
   };
 
+  const handleScoreSubmit = async (fixtureId: string) => {
+    try {
+      setSubmittingScore(true);
+      await api.submitFixtureScore(fixtureId, p1ScoreInput, p2ScoreInput);
+      setReportingFixtureId(null);
+      await refreshUser();
+      await fetchTournament();
+      alert("Match score confirmed and winner advanced in bracket!");
+    } catch (err: any) {
+      alert(err.message || "Failed to submit fixture score");
+    } finally {
+      setSubmittingScore(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
@@ -745,6 +1006,10 @@ function TournamentDetailView({ tournamentId, onBack }: { tournamentId: string; 
   const isParticipant = tournament.participants?.some((p: any) => p.user?.id === user?.id);
   const isFull = (tournament.joinedPlayers || 0) >= tournament.maxPlayers;
   const openSlotsCount = Math.max(0, tournament.maxPlayers - (tournament.participants?.length || 0));
+
+  const qfFixtures = fixtures.filter((f) => f.round === "QUARTER_FINALS");
+  const sfFixtures = fixtures.filter((f) => f.round === "SEMI_FINALS");
+  const finalsFixture = fixtures.find((f) => f.round === "FINALS");
 
   return (
     <div className="relative">
@@ -787,6 +1052,250 @@ function TournamentDetailView({ tournamentId, onBack }: { tournamentId: string; 
         {error && (
           <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400">
             {error}
+          </div>
+        )}
+
+        {/* Visual Knockout Bracket Section */}
+        <section className="border-b border-[#292c32] py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#00FF66]" />
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#00FF66]">Live Knockout Stage</p>
+              </div>
+              <h2 className="mt-1 text-xl font-black text-white">Tournament Bracket Tree</h2>
+            </div>
+            <p className="text-xs text-[#737883]">
+              Quarterfinals ➔ Semifinals ➔ Grand Final • Report score to advance
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-x-auto pb-4">
+            {/* Quarter Finals Column */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#2b2e35] pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8c919d]">
+                <span>Quarter-Finals</span>
+                <span className="text-[#00FF66]">Round 1</span>
+              </div>
+              {(qfFixtures.length > 0 ? qfFixtures : [1, 2, 3, 4]).map((fix: any, i: number) => {
+                const isReal = typeof fix === "object";
+                const p1 = isReal ? fix.player1 : tournament.participants?.[i * 2]?.user;
+                const p2 = isReal ? fix.player2 : tournament.participants?.[i * 2 + 1]?.user;
+                const isMyMatch = isReal && (p1?.id === user?.id || p2?.id === user?.id);
+                const isCompleted = isReal && fix.status === "COMPLETED";
+
+                return (
+                  <div
+                    key={isReal ? fix.id : i}
+                    className={`rounded-xl border p-4 transition-all ${
+                      isCompleted
+                        ? "border-[#282b31] bg-[#121418]"
+                        : isMyMatch
+                        ? "border-[#00FF66]/40 bg-[#121b15] shadow-[0_0_20px_rgba(0,255,102,0.1)]"
+                        : "border-[#2b2e35] bg-[#14161a]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[9px] text-[#6b707c] mb-2 font-mono">
+                      <span>Match #{i + 1}</span>
+                      <span className={isCompleted ? "text-[#00FF66] font-bold" : "text-yellow-400"}>
+                        {isCompleted ? "Final" : "Scheduled"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs font-bold ${
+                        isCompleted && fix.winner?.id === p1?.id ? "bg-[#00FF66]/15 text-[#00FF66]" : "bg-[#0d0e11] text-white"
+                      }`}>
+                        <span className="truncate max-w-[120px]">{p1 ? `@${p1.username}` : "TBD"}</span>
+                        <span>{isCompleted ? fix.player1Score : "—"}</span>
+                      </div>
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs font-bold ${
+                        isCompleted && fix.winner?.id === p2?.id ? "bg-[#00FF66]/15 text-[#00FF66]" : "bg-[#0d0e11] text-white"
+                      }`}>
+                        <span className="truncate max-w-[120px]">{p2 ? `@${p2.username}` : "TBD"}</span>
+                        <span>{isCompleted ? fix.player2Score : "—"}</span>
+                      </div>
+                    </div>
+
+                    {isMyMatch && !isCompleted && p1 && p2 && (
+                      <button
+                        onClick={() => setReportingFixtureId(fix.id)}
+                        className="mt-3 w-full rounded-lg bg-[#00FF66] py-1.5 text-center text-[10px] font-black uppercase text-black hover:brightness-110"
+                      >
+                        Submit Score
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Semi Finals Column */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#2b2e35] pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8c919d]">
+                <span>Semi-Finals</span>
+                <span className="text-[#00FF66]">Round 2</span>
+              </div>
+              {(sfFixtures.length > 0 ? sfFixtures : [1, 2]).map((fix: any, i: number) => {
+                const isReal = typeof fix === "object";
+                const p1 = isReal ? fix.player1 : null;
+                const p2 = isReal ? fix.player2 : null;
+                const isMyMatch = isReal && (p1?.id === user?.id || p2?.id === user?.id);
+                const isCompleted = isReal && fix.status === "COMPLETED";
+
+                return (
+                  <div
+                    key={isReal ? fix.id : i}
+                    className={`rounded-xl border p-4 sm:mt-10 ${
+                      isCompleted
+                        ? "border-[#282b31] bg-[#121418]"
+                        : isMyMatch
+                        ? "border-[#00FF66]/40 bg-[#121b15]"
+                        : "border-[#2b2e35] bg-[#14161a]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[9px] text-[#6b707c] mb-2 font-mono">
+                      <span>Semi #{i + 1}</span>
+                      <span className={isCompleted ? "text-[#00FF66] font-bold" : "text-yellow-400"}>
+                        {isCompleted ? "Final" : "Awaiting QF"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs font-bold ${
+                        isCompleted && fix.winner?.id === p1?.id ? "bg-[#00FF66]/15 text-[#00FF66]" : "bg-[#0d0e11] text-white"
+                      }`}>
+                        <span className="truncate max-w-[120px]">{p1 ? `@${p1.username}` : "Winner QF"}</span>
+                        <span>{isCompleted ? fix.player1Score : "—"}</span>
+                      </div>
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs font-bold ${
+                        isCompleted && fix.winner?.id === p2?.id ? "bg-[#00FF66]/15 text-[#00FF66]" : "bg-[#0d0e11] text-white"
+                      }`}>
+                        <span className="truncate max-w-[120px]">{p2 ? `@${p2.username}` : "Winner QF"}</span>
+                        <span>{isCompleted ? fix.player2Score : "—"}</span>
+                      </div>
+                    </div>
+
+                    {isMyMatch && !isCompleted && p1 && p2 && (
+                      <button
+                        onClick={() => setReportingFixtureId(fix.id)}
+                        className="mt-3 w-full rounded-lg bg-[#00FF66] py-1.5 text-center text-[10px] font-black uppercase text-black hover:brightness-110"
+                      >
+                        Submit Score
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Finals Column */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#2b2e35] pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8c919d]">
+                <span>Grand Final</span>
+                <span className="text-[#00FF66]">Championship</span>
+              </div>
+              {(() => {
+                const fix = finalsFixture;
+                const p1 = fix?.player1;
+                const p2 = fix?.player2;
+                const isMyMatch = fix && (p1?.id === user?.id || p2?.id === user?.id);
+                const isCompleted = fix?.status === "COMPLETED";
+
+                return (
+                  <div className={`rounded-xl border p-5 sm:mt-24 ${
+                    isCompleted
+                      ? "border-[#00FF66]/50 bg-gradient-to-b from-[#142319] to-[#0f1712] shadow-[0_0_35px_rgba(0,255,102,0.15)]"
+                      : "border-[#2b2e35] bg-[#14161a]"
+                  }`}>
+                    <div className="flex items-center justify-between text-[10px] text-[#6b707c] mb-3">
+                      <span className="font-mono text-[#00FF66] font-bold">🏆 Trophy Match</span>
+                      <span className={isCompleted ? "text-[#00FF66] font-bold" : "text-yellow-400"}>
+                        {isCompleted ? "Champion Crowned" : "Awaiting Finalists"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs font-bold ${
+                        isCompleted && fix.winner?.id === p1?.id ? "bg-[#00FF66] text-black" : "bg-[#0d0e11] text-white"
+                      }`}>
+                        <span className="truncate max-w-[120px]">{p1 ? `@${p1.username}` : "Finalist 1"}</span>
+                        <span>{isCompleted ? fix.player1Score : "—"}</span>
+                      </div>
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs font-bold ${
+                        isCompleted && fix.winner?.id === p2?.id ? "bg-[#00FF66] text-black" : "bg-[#0d0e11] text-white"
+                      }`}>
+                        <span className="truncate max-w-[120px]">{p2 ? `@${p2.username}` : "Finalist 2"}</span>
+                        <span>{isCompleted ? fix.player2Score : "—"}</span>
+                      </div>
+                    </div>
+
+                    {isCompleted && fix.winner && (
+                      <div className="mt-4 rounded-lg bg-[#00FF66]/10 p-3 text-center text-xs">
+                        <p className="text-[10px] uppercase tracking-wider text-[#00FF66] font-black">Tournament Winner</p>
+                        <p className="text-sm font-black text-white mt-1">@{fix.winner.username} 🎉</p>
+                        <p className="text-[10px] text-[#8c919d] mt-0.5">
+                          Awarded ₦{(Number(tournament.totalPrizePool) * 0.9).toLocaleString()} prize
+                        </p>
+                      </div>
+                    )}
+
+                    {isMyMatch && !isCompleted && p1 && p2 && (
+                      <button
+                        onClick={() => setReportingFixtureId(fix.id)}
+                        className="mt-3 w-full rounded-lg bg-[#00FF66] py-2 text-center text-xs font-black uppercase text-black hover:brightness-110"
+                      >
+                        Submit Final Score
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </section>
+
+        {/* Modal for reporting fixture score */}
+        {reportingFixtureId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+            <div className="w-full max-w-sm rounded-xl border border-[#2b2e35] bg-[#14161a] p-6 shadow-2xl">
+              <h3 className="text-base font-black text-white">Report Bracket Score</h3>
+              <p className="mt-1 text-xs text-[#737883]">
+                Enter the final whistle goals. The winner advances to the next round.
+              </p>
+              <div className="my-5 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-[#888d98] mb-1">Player 1 Goals</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    value={p1ScoreInput}
+                    onChange={(e) => setP1ScoreInput(parseInt(e.target.value) || 0)}
+                    className="w-full h-11 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-center text-lg font-black text-white focus:border-[#00FF66] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-[#888d98] mb-1">Player 2 Goals</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    value={p2ScoreInput}
+                    onChange={(e) => setP2ScoreInput(parseInt(e.target.value) || 0)}
+                    className="w-full h-11 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-center text-lg font-black text-white focus:border-[#00FF66] focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1 h-10 text-xs" variant="secondary" onClick={() => setReportingFixtureId(null)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 h-10 text-xs" onClick={() => handleScoreSubmit(reportingFixtureId)} disabled={submittingScore}>
+                  {submittingScore ? "Submitting..." : "Confirm Winner"}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
