@@ -23,7 +23,24 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
   const [disputeReason, setDisputeReason] = useState<string>("");
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [disputeEvidence, setDisputeEvidence] = useState<string>("");
+  const [disputeFiles, setDisputeFiles] = useState<File[]>([]);
+  const [disputeFilePreviews, setDisputeFilePreviews] = useState<string[]>([]);
+  const [disputeRules, setDisputeRules] = useState<string>("");
   const [cancellingChallenge, setCancellingChallenge] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files).slice(0, 5); // Allow up to 5 screenshots
+      setDisputeFiles(filesArray);
+      const previewUrls = filesArray.map((file) => URL.createObjectURL(file));
+      setDisputeFilePreviews(previewUrls);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setDisputeFiles((prev) => prev.filter((_, i) => i !== index));
+    setDisputeFilePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleCancelChallenge = async () => {
     if (!confirm(`Are you sure you want to cancel this challenge? Your stake of ₦${Number(match.stakeAmount).toLocaleString()} will be refunded to your wallet immediately.`)) {
@@ -224,13 +241,19 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
   const handleRaiseDispute = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!disputeReason.trim()) {
-      alert("Please provide details for the dispute");
+      alert("Please provide an explanation / summary for the dispute");
       return;
     }
     setSubmittingDispute(true);
     try {
-      await api.disputeMatch(match.id, disputeReason, disputeEvidence);
-      alert("Dispute reported. An administrator has been notified to review proof.");
+      if (disputeFiles.length > 0) {
+        await api.uploadEvidence(match.id, disputeFiles, disputeReason);
+      } else {
+        await api.disputeMatch(match.id, disputeReason, disputeEvidence);
+      }
+      alert("Dispute proof submitted successfully! The admin has been notified with your username and uploaded proof.");
+      setDisputeFiles([]);
+      setDisputeFilePreviews([]);
       fetchMatch();
     } catch (e: any) {
       alert(e.message || "Failed to report dispute");
@@ -552,11 +575,25 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                       </div>
                     </div>
 
+                    {/* Admin Defined Dispute Acceptance Guidelines */}
+                    <div className="mb-4 rounded-lg border border-[#30343f] bg-[#0d0f13] p-4 text-xs">
+                      <div className="flex items-center gap-2 mb-1 text-[#00FF66]">
+                        <Icon name="shield" size={14} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Official Evidence Rules &amp; Requirements</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-[#9ca3af]">
+                        {disputeRules || "Upload clear, uncropped in-game final whistle screenshots or full video proof displaying the final score, both players' IDs/Gamertags, and post-match summary stats. Altered or cropped images are rejected."}
+                      </p>
+                      <p className="mt-2 text-[10px] text-[#636873]">
+                        Your uploaded proofs will be permanently watermarked with your username (<strong className="text-white">@{user?.username}</strong>) for administrative arbitrament.
+                      </p>
+                    </div>
+
                     <p className="text-xs leading-relaxed text-[#9ca3af] mb-4">
-                      Escrow funds (<span className="text-white font-bold">₦{Number(match.prizePool).toLocaleString()}</span>) are frozen safely. Provide match proof (e.g. screenshot or video link) below for the admin to inspect and award the prize.
+                      Escrow funds (<span className="text-white font-bold">₦{Number(match.prizePool).toLocaleString()}</span>) are frozen safely. Provide your match proof below for the admin to inspect and award the prize.
                     </p>
 
-                    <form onSubmit={handleRaiseDispute} className="space-y-3">
+                    <form onSubmit={handleRaiseDispute} className="space-y-4">
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#9ca3af] mb-1">
                           Dispute Explanation / Match Summary
@@ -570,15 +607,65 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                         />
                       </div>
 
+                      {/* Multiple Image Upload via Cloudinary */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#9ca3af]">
+                            Upload Screenshot Proofs (Up to 5 images)
+                          </label>
+                          <span className="text-[10px] text-[#00FF66] font-bold">via Cloudinary Secure Storage</span>
+                        </div>
+
+                        <div className="relative mt-1">
+                          <label className="flex flex-col items-center justify-center w-full min-h-[90px] border-2 border-dashed border-[#343842] hover:border-[#00FF66]/50 rounded-xl cursor-pointer bg-[#090a0d] hover:bg-[#0d0f14] transition p-4 text-center">
+                            <Icon name="camera" size={24} className="text-[#646a78] mb-1.5" />
+                            <span className="text-xs font-bold text-white">Click to Select or Drag &amp; Drop Proof Screenshots</span>
+                            <span className="text-[10px] text-[#6e7482] mt-0.5">JPG, PNG, WEBP (Max 5 images)</span>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/png, image/jpeg, image/jpg, image/webp"
+                              className="hidden"
+                              onChange={handleFileChange}
+                            />
+                          </label>
+                        </div>
+
+                        {/* Image Previews */}
+                        {disputeFilePreviews.length > 0 && (
+                          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            {disputeFilePreviews.map((previewUrl, index) => (
+                              <div key={index} className="relative rounded-lg overflow-hidden border border-[#2e323b] bg-black group">
+                                <img
+                                  src={previewUrl}
+                                  alt={`Proof ${index + 1}`}
+                                  className="w-full h-24 object-cover"
+                                />
+                                <div className="absolute top-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[8px] font-mono text-[#00FF66]">
+                                  Proof #{index + 1}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(index)}
+                                  className="absolute top-1 right-1 size-5 rounded-full bg-red-600/80 hover:bg-red-600 text-white flex items-center justify-center text-xs font-black"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#9ca3af] mb-1">
-                          Screenshot / Video Evidence URL (Optional)
+                          Video Recording / External Link (Optional)
                         </label>
                         <input
                           type="url"
                           value={disputeEvidence}
                           onChange={(e) => setDisputeEvidence(e.target.value)}
-                          placeholder="https://imgur.com/... or Google Drive link"
+                          placeholder="https://youtu.be/... or Google Drive video link"
                           className="w-full h-11 rounded-xl border border-[#373b45] bg-[#0c0d10] px-3 text-xs text-white placeholder-[#5d6371] focus:border-red-500 focus:outline-none"
                         />
                       </div>
@@ -588,7 +675,7 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                         disabled={submittingDispute}
                         className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-xs uppercase tracking-wider text-white transition active:scale-[0.98] disabled:opacity-50"
                       >
-                        {submittingDispute ? "Submitting to Admin..." : "Submit Evidence to Support"}
+                        {submittingDispute ? "Uploading Proof to Cloudinary..." : `Submit Proof as @${user?.username}`}
                       </button>
                     </form>
                   </div>

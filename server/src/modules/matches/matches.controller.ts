@@ -7,8 +7,13 @@ import {
   Param,
   UseGuards,
   Request,
+  UseInterceptors,
+  UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { MatchesService } from './matches.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import {
   CreateMatchDto,
   SubmitScoreDto,
@@ -18,7 +23,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('matches')
 export class MatchesController {
-  constructor(private readonly matchesService: MatchesService) {}
+  constructor(
+    private readonly matchesService: MatchesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('open')
   getOpenMatches() {
@@ -67,6 +75,27 @@ export class MatchesController {
     @Body() dto: DisputeMatchDto,
   ) {
     return this.matchesService.disputeMatch(req.user.sub, matchId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/dispute/evidence')
+  @UseInterceptors(FilesInterceptor('files', 5))
+  async uploadDisputeEvidence(
+    @Request() req: any,
+    @Param('id') matchId: string,
+    @UploadedFiles() files: any[],
+    @Body('reason') reason?: string,
+  ) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('At least one evidence screenshot or photo is required');
+    }
+
+    const uploadedUrls = await this.cloudinaryService.uploadMultipleImages(files, 'efchamps/disputes');
+    return this.matchesService.disputeMatch(req.user.sub, matchId, {
+      reason: reason || 'Uploaded image evidence for dispute',
+      evidenceUrls: uploadedUrls,
+      evidenceUrl: uploadedUrls[0],
+    });
   }
 
   @UseGuards(JwtAuthGuard)

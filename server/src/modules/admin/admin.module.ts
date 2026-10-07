@@ -5,6 +5,7 @@ import { Match } from '../../entities/match.entity';
 import { MatchDispute } from '../../entities/dispute.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { Tournament } from '../../entities/tournament.entity';
+import { PlatformSetting } from '../../entities/platform-setting.entity';
 import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
 import { AuthModule } from '../auth/auth.module';
@@ -17,6 +18,7 @@ import { AuthModule } from '../auth/auth.module';
       MatchDispute,
       Transaction,
       Tournament,
+      PlatformSetting,
     ]),
     AuthModule,
   ],

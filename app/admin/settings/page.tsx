@@ -7,25 +7,42 @@ import { ViewHeading } from "../page";
 
 export default function AdminSettingsPage() {
   const [duration, setDuration] = useState<number>(6);
+  const [feePercentage, setFeePercentage] = useState<number>(10);
+  const [disputeRules, setDisputeRules] = useState<string>("Clear in-game final whistle screenshot or recording showing final score, Konami ID/PSN/Gamertag, and match stats. Uncropped, unedited JPG/PNG only.");
+  const [acceptedFormats, setAcceptedFormats] = useState<string>("JPG, PNG, WEBP (Max 10MB per image)");
   const [saving, setSaving] = useState<boolean>(false);
   const [savedMsg, setSavedMsg] = useState<string>("");
 
   useEffect(() => {
-    api.getMatchDuration()
-      .then((res: any) => {
-        if (res?.minutes) setDuration(res.minutes);
+    api.getAdminSettings()
+      .then((settings: any) => {
+        if (settings?.DEFAULT_MATCH_DURATION_MINUTES) setDuration(Number(settings.DEFAULT_MATCH_DURATION_MINUTES));
+        if (settings?.PLATFORM_FEE_PERCENTAGE) setFeePercentage(Number(settings.PLATFORM_FEE_PERCENTAGE));
+        if (settings?.DISPUTE_IMAGE_RULES) setDisputeRules(settings.DISPUTE_IMAGE_RULES);
+        if (settings?.DISPUTE_ACCEPTED_FORMATS) setAcceptedFormats(settings.DISPUTE_ACCEPTED_FORMATS);
       })
-      .catch(() => {});
+      .catch(() => {
+        api.getMatchDuration()
+          .then((res: any) => {
+            if (res?.minutes) setDuration(res.minutes);
+          })
+          .catch(() => {});
+      });
   }, []);
 
   const handleSave = async () => {
     setSaving(true);
     setSavedMsg("");
     try {
-      await api.setMatchDuration(duration);
-      setSavedMsg("Settings updated successfully!");
+      await Promise.all([
+        api.setMatchDuration(duration),
+        api.updateAdminSetting("PLATFORM_FEE_PERCENTAGE", String(feePercentage), "Global platform rake fee percentage deducted from match prize pools"),
+        api.updateAdminSetting("DISPUTE_IMAGE_RULES", disputeRules, "Dispute evidence guidelines and acceptance criteria shown to players"),
+        api.updateAdminSetting("DISPUTE_ACCEPTED_FORMATS", acceptedFormats, "Supported screenshot and video formats for disputes"),
+      ]);
+      setSavedMsg("All platform settings updated successfully!");
     } catch (e: any) {
-      alert(e.message || "Failed to update match duration");
+      alert(e.message || "Failed to update platform settings");
     } finally {
       setSaving(false);
     }
@@ -42,13 +59,74 @@ export default function AdminSettingsPage() {
             </Button>
           </div>
         }
-        copy="Control global platform behavior, settlement rules, and match duration limits."
+        copy="Control global platform behavior, settlement commission fees, dispute rules, and match duration limits."
         eyebrow="Restricted configuration"
         title="Platform settings"
       />
 
-      {/* Time To Complete / Match Timer Setting Card */}
+      {/* Platform Fee Percentage Setting Card */}
       <div className="mb-6 rounded-lg border border-[#00FF66]/30 bg-[#14161a] p-6 shadow-[0_0_30px_rgba(0,255,102,0.05)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-[#00FF66]" />
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">Platform Fee Commission (Rake %)</h3>
+            </div>
+            <p className="mt-1 text-xs text-[#737883]">
+              Editable percentage taken by efChamps on each completed match prize pool. Currently set to <span className="text-[#00FF66] font-bold">{feePercentage}%</span> (Winner takes {100 - feePercentage}% of combined stakes).
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              min={1}
+              max={50}
+              value={feePercentage}
+              onChange={(e) => setFeePercentage(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+              className="h-11 w-24 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-center text-base font-black text-[#00FF66] focus:border-[#00FF66] focus:outline-none"
+            />
+            <span className="text-xs font-bold text-white uppercase tracking-wider">% Rake</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Dispute Evidence Guidelines Setting Card */}
+      <div className="mb-6 rounded-lg border border-[#292c32] bg-[#14161a] p-6">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="size-2 rounded-full bg-[#ef4444]" />
+          <h3 className="text-sm font-black text-white uppercase tracking-wider">Dispute Evidence &amp; Accepted Proof Rules</h3>
+        </div>
+        <p className="text-xs text-[#737883] mb-4">
+          Specify the criteria players must meet when uploading screenshot proofs to Cloudinary during a contested match. These rules appear in the Match Room for both players.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#9ca3af] mb-1">
+              Required Image Content &amp; Fair Play Rules
+            </label>
+            <textarea
+              rows={3}
+              value={disputeRules}
+              onChange={(e) => setDisputeRules(e.target.value)}
+              className="w-full rounded-lg border border-[#2b2e35] bg-[#0c0d10] p-3 text-xs text-white placeholder-[#505561] focus:border-[#00FF66] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#9ca3af] mb-1">
+              Accepted Image Formats &amp; Specifications
+            </label>
+            <input
+              type="text"
+              value={acceptedFormats}
+              onChange={(e) => setAcceptedFormats(e.target.value)}
+              className="w-full h-10 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-xs text-white placeholder-[#505561] focus:border-[#00FF66] focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Time To Complete / Match Timer Setting Card */}
+      <div className="mb-6 rounded-lg border border-[#292c32] bg-[#14161a] p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">

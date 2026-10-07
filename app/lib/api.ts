@@ -126,6 +126,34 @@ export const api = {
   getLeaderboard: (platform?: string) =>
     apiRequest(`/leaderboard${platform ? `?platform=${platform}` : ''}`),
 
+  uploadEvidence: async (matchId: string, files: File[], reason?: string) => {
+    const token = getAuthToken();
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    if (reason) {
+      formData.append('reason', reason);
+    }
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE}/matches/${matchId}/dispute/evidence`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(data?.message || `Upload failed with status ${response.status}`);
+    }
+    return data;
+  },
+
   // Admin
   getAdminOverview: () => apiRequest('/admin/overview'),
   getAdminPlayers: () => apiRequest('/admin/players'),
@@ -138,6 +166,17 @@ export const api = {
     apiRequest('/admin/match-duration', {
       method: 'POST',
       body: JSON.stringify({ minutes }),
+    }),
+  getAdminSettings: () => apiRequest('/admin/settings'),
+  updateAdminSetting: (key: string, value: string, description?: string) =>
+    apiRequest('/admin/settings', {
+      method: 'POST',
+      body: JSON.stringify({ key, value, description }),
+    }),
+  resolveDispute: (disputeId: string, winnerId: string, resolutionNotes?: string) =>
+    apiRequest('/admin/resolve-dispute', {
+      method: 'POST',
+      body: JSON.stringify({ disputeId, winnerId, resolutionNotes }),
     }),
   updateUserRole: (userId: string, role: string) =>
     apiRequest('/admin/update-role', {

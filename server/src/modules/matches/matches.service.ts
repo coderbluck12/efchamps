@@ -17,6 +17,7 @@ import {
   MatchDispute,
   DisputeStatus,
 } from '../../entities/dispute.entity';
+import { PlatformSetting } from '../../entities/platform-setting.entity';
 import {
   CreateMatchDto,
   SubmitScoreDto,
@@ -32,6 +33,8 @@ export class MatchesService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(MatchDispute)
     private readonly disputeRepository: Repository<MatchDispute>,
+    @InjectRepository(PlatformSetting)
+    private readonly platformSettingRepository: Repository<PlatformSetting>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -116,8 +119,23 @@ export class MatchesService {
       });
       await queryRunner.manager.save(tx);
 
-      // Prize pool is 1.8x the total stake (10% platform rake, 90% payout)
-      const prizePool = Number(dto.stakeAmount) * 1.8;
+      // Calculate prize pool dynamically from platform fee percentage (default 10% rake)
+      let feePercent = 10;
+      try {
+        const feeSetting = await queryRunner.manager.findOne(PlatformSetting, {
+          where: { key: 'PLATFORM_FEE_PERCENTAGE' },
+        });
+        if (feeSetting && !isNaN(Number(feeSetting.value))) {
+          feePercent = Number(feeSetting.value);
+        }
+      } catch (e) {
+        // Fallback to default
+      }
+
+      // Total stake is 2 * stakeAmount. Platform takes feePercent / 100, winner gets the rest.
+      const totalCombinedStake = Number(dto.stakeAmount) * 2;
+      const rakeMultiplier = (100 - feePercent) / 100;
+      const prizePool = totalCombinedStake * rakeMultiplier;
 
       const match = queryRunner.manager.create(Match, {
         creator,
@@ -432,13 +450,43 @@ export class MatchesService {
     match.status = MatchStatus.DISPUTED;
     await this.matchRepository.save(match);
 
-    const dispute = this.disputeRepository.create({
-      match,
-      raisedBy: user,
-      reason: dto.reason,
-      evidenceUrl: dto.evidenceUrl,
-      status: DisputeStatus.IN_REVIEW,
+    let dispute = await this.disputeRepository.findOne({
+      where: { match: { id: matchId } },
+      relations: ['match', 'raisedBy'],
     });
+
+    const isCreator = match.creator?.id === userId;
+    const isOpponent = match.opponent?.id === userId;
+
+    const urls = dto.evidenceUrls && dto.evidenceUrls.length > 0 
+      ? dto.evidenceUrls 
+      : dto.evidenceUrl ? [dto.evidenceUrl] : [];
+
+    if (!dispute) {
+      dispute = this.disputeRepository.create({
+        match,
+        raisedBy: user,
+        reason: dto.reason,
+        evidenceUrl: urls[0] || undefined,
+        evidenceUrls: urls,
+        status: DisputeStatus.IN_REVIEW,
+        creatorReason: isCreator ? dto.reason : undefined,
+        opponentReason: isOpponent ? dto.reason : undefined,
+        creatorEvidenceUrls: isCreator ? urls : [],
+        opponentEvidenceUrls: isOpponent ? urls : [],
+      });
+    } else {
+      // Append proof and reason to the respective player's evidence
+      if (isCreator) {
+        dispute.creatorReason = dto.reason;
+        dispute.creatorEvidenceUrls = Array.from(new Set([...(dispute.creatorEvidenceUrls || []), ...urls]));
+      } else if (isOpponent) {
+        dispute.opponentReason = dto.reason;
+        dispute.opponentEvidenceUrls = Array.from(new Set([...(dispute.opponentEvidenceUrls || []), ...urls]));
+      }
+      dispute.evidenceUrls = Array.from(new Set([...(dispute.evidenceUrls || []), ...urls]));
+      dispute.status = DisputeStatus.IN_REVIEW;
+    }
 
     return this.disputeRepository.save(dispute);
   }

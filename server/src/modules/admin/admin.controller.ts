@@ -72,4 +72,19 @@ export class AdminController {
   deleteTournament(@Body('tournamentId') tournamentId: string) {
     return this.adminService.adminDeleteTournament(tournamentId);
   }
+
+  @Get('settings')
+  getSettings() {
+    return this.adminService.getPlatformSettings();
+  }
+
+  @Post('settings')
+  updateSetting(@Body() body: { key: string; value: string; description?: string }) {
+    return this.adminService.updatePlatformSetting(body.key, String(body.value), body.description);
+  }
+
+  @Post('resolve-dispute')
+  resolveDispute(@Body() body: { disputeId: string; winnerId: string; resolutionNotes?: string }) {
+    return this.adminService.resolveDispute(body.disputeId, body.winnerId, body.resolutionNotes);
+  }
 }

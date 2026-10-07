@@ -8,6 +8,7 @@ import { Transaction, TransactionType, TransactionStatus } from '../../entities/
 import { Tournament, TournamentStatus } from '../../entities/tournament.entity';
 import { TournamentParticipant } from '../../entities/tournament-participant.entity';
 import { Wallet } from '../../entities/wallet.entity';
+import { PlatformSetting } from '../../entities/platform-setting.entity';
 
 @Injectable()
 export class AdminService {
@@ -23,6 +24,8 @@ export class AdminService {
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(Tournament)
     private readonly tournamentRepository: Repository<Tournament>,
+    @InjectRepository(PlatformSetting)
+    private readonly platformSettingRepository: Repository<PlatformSetting>,
   ) {}
 
   async getOverviewStats() {
@@ -85,7 +88,7 @@ export class AdminService {
 
   async getDisputes() {
     return this.disputeRepository.find({
-      relations: ['match', 'raisedBy'],
+      relations: ['match', 'match.creator', 'match.opponent', 'raisedBy'],
       take: 50,
       order: { createdAt: 'DESC' },
     });
@@ -107,7 +110,122 @@ export class AdminService {
 
   async setMatchDuration(minutes: number) {
     AdminService.currentMatchDurationMinutes = minutes;
+    await this.updatePlatformSetting('DEFAULT_MATCH_DURATION_MINUTES', String(minutes));
     return { minutes: AdminService.currentMatchDurationMinutes };
+  }
+
+  async getPlatformSettings() {
+    const settings = await this.platformSettingRepository.find();
+    const settingsMap: Record<string, string> = {
+      PLATFORM_FEE_PERCENTAGE: '10',
+      DISPUTE_IMAGE_RULES: 'Clear in-game final whistle screenshot or recording showing final score, Konami ID/PSN/Gamertag, and match stats. Uncropped, unedited JPG/PNG only.',
+      DISPUTE_ACCEPTED_FORMATS: 'JPG, PNG, WEBP (Max 10MB per image)',
+      DEFAULT_MATCH_DURATION_MINUTES: String(AdminService.currentMatchDurationMinutes),
+    };
+
+    settings.forEach((s) => {
+      settingsMap[s.key] = s.value;
+    });
+
+    return settingsMap;
+  }
+
+  async updatePlatformSetting(key: string, value: string, description?: string) {
+    let setting = await this.platformSettingRepository.findOne({ where: { key } });
+    if (!setting) {
+      setting = this.platformSettingRepository.create({ key, value, description });
+    } else {
+      setting.value = value;
+      if (description) setting.description = description;
+    }
+    await this.platformSettingRepository.save(setting);
+    return { [key]: value };
+  }
+
+  async resolveDispute(disputeId: string, winnerId: string, resolutionNotes?: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const dispute = await queryRunner.manager.findOne(MatchDispute, {
+        where: { id: disputeId },
+        relations: ['match', 'match.creator', 'match.creator.wallet', 'match.opponent', 'match.opponent.wallet'],
+      });
+
+      if (!dispute) {
+        throw new NotFoundException('Dispute not found');
+      }
+
+      const match = dispute.match;
+      if (!match) {
+        throw new NotFoundException('Match associated with dispute not found');
+      }
+
+      if (match.status === MatchStatus.COMPLETED) {
+        throw new BadRequestException('Match is already completed');
+      }
+
+      const winner = match.creator?.id === winnerId ? match.creator : match.opponent;
+      const loser = match.creator?.id === winnerId ? match.opponent : match.creator;
+
+      if (!winner || !loser) {
+        throw new BadRequestException('Winner or loser cannot be determined from given winnerId');
+      }
+
+      // Unlock escrow balances
+      winner.wallet.escrowLockedBalance = Math.max(
+        0,
+        Number(winner.wallet.escrowLockedBalance) - Number(match.stakeAmount),
+      );
+      loser.wallet.escrowLockedBalance = Math.max(
+        0,
+        Number(loser.wallet.escrowLockedBalance) - Number(match.stakeAmount),
+      );
+
+      // Award prize pool to winner
+      winner.wallet.availableBalance =
+        Number(winner.wallet.availableBalance) + Number(match.prizePool);
+
+      // Update win stats
+      winner.matchesPlayed = (winner.matchesPlayed || 0) + 1;
+      winner.matchesWon = (winner.matchesWon || 0) + 1;
+      winner.winRate = Math.round((winner.matchesWon / winner.matchesPlayed) * 100);
+
+      loser.matchesPlayed = (loser.matchesPlayed || 0) + 1;
+      loser.winRate = Math.round(((loser.matchesWon || 0) / loser.matchesPlayed) * 100);
+
+      await queryRunner.manager.save(winner.wallet);
+      await queryRunner.manager.save(loser.wallet);
+      await queryRunner.manager.save(winner);
+      await queryRunner.manager.save(loser);
+
+      // Record winning transaction
+      const prizeTx = queryRunner.manager.create(Transaction, {
+        wallet: winner.wallet,
+        type: TransactionType.PRIZE_WON,
+        amount: match.prizePool,
+        status: TransactionStatus.COMPLETED,
+        description: `Dispute Awarded: Match #${match.id.slice(0, 8)} vs ${loser.username}`,
+      });
+      await queryRunner.manager.save(prizeTx);
+
+      match.status = MatchStatus.COMPLETED;
+      match.winner = winner;
+      await queryRunner.manager.save(match);
+
+      dispute.status = 'RESOLVED' as any;
+      dispute.resolutionNotes = resolutionNotes || `Resolved in favor of ${winner.username}`;
+      await queryRunner.manager.save(dispute);
+
+      await queryRunner.commitTransaction();
+      return { message: 'Dispute successfully resolved', dispute, match };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async updateUserRole(userId: string, role: string) {

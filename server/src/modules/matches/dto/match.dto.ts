@@ -34,4 +34,7 @@ export class DisputeMatchDto {
   @IsString()
   @IsOptional()
   evidenceUrl?: string;
+
+  @IsOptional()
+  evidenceUrls?: string[];
 }

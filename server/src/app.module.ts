@@ -7,6 +7,7 @@ import { Transaction } from './entities/transaction.entity';
 import { Match } from './entities/match.entity';
 import { MatchDispute } from './entities/dispute.entity';
 import { Tournament } from './entities/tournament.entity';
+import { PlatformSetting } from './entities/platform-setting.entity';
 import { TournamentParticipant } from './entities/tournament-participant.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { WalletModule } from './modules/wallet/wallet.module';
@@ -14,6 +15,7 @@ import { MatchesModule } from './modules/matches/matches.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { SeedService } from './seed/seed.service';
 
 @Module({
@@ -59,6 +61,7 @@ import { SeedService } from './seed/seed.service';
             MatchDispute,
             Tournament,
             TournamentParticipant,
+            PlatformSetting,
           ],
           synchronize: true, // Automatically synchronize database schema in development
           logging: config.get<string>('NODE_ENV') === 'development',
@@ -71,6 +74,7 @@ import { SeedService } from './seed/seed.service';
     TournamentsModule,
     LeaderboardModule,
     AdminModule,
+    CloudinaryModule,
     TypeOrmModule.forFeature([
       User,
       Wallet,
@@ -79,6 +83,7 @@ import { SeedService } from './seed/seed.service';
       MatchDispute,
       Tournament,
       TournamentParticipant,
+      PlatformSetting,
     ]),
   ],
   providers: [SeedService],

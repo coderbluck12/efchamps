@@ -31,6 +31,21 @@ export class MatchDispute {
   @Column({ nullable: true })
   evidenceUrl?: string;
 
+  @Column({ type: 'simple-array', nullable: true })
+  evidenceUrls?: string[];
+
+  @Column({ type: 'simple-array', nullable: true })
+  creatorEvidenceUrls?: string[];
+
+  @Column({ type: 'simple-array', nullable: true })
+  opponentEvidenceUrls?: string[];
+
+  @Column({ type: 'text', nullable: true })
+  creatorReason?: string;
+
+  @Column({ type: 'text', nullable: true })
+  opponentReason?: string;
+
   @Column({
     type: 'enum',
     enum: DisputeStatus,

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 export type IconName =
   | "arrow"
   | "bolt"
+  | "camera"
   | "check"
   | "chevron"
   | "controller"
@@ -23,6 +24,12 @@ export function Icon({ name, size = 20, className = "" }: { name: IconName; size
   const paths: Record<IconName, ReactNode> = {
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
     bolt: <path d="m13 2-8 11h7l-1 9 8-12h-7l1-8Z" />,
+    camera: (
+      <>
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+        <circle cx="12" cy="13" r="3" />
+      </>
+    ),
     check: <path d="m5 12 4 4L19 6" />,
     chevron: <path d="m8 10 4 4 4-4" />,
     logout: (
