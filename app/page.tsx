@@ -278,7 +278,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="mx-auto mt-8 flex max-w-[1280px] flex-col sm:flex-row justify-between gap-4 border-t border-[#23262b] pt-5 text-[8px] uppercase tracking-[0.12em] text-[#494e57]">
-          <span>© 2026 GoalVault. All rights reserved.</span>
+          <span>© 2026 efChamps. All rights reserved.</span>
           <span>Controller photography: Federico Vitale / Unsplash</span>
         </div>
       </footer>

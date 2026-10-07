@@ -462,7 +462,7 @@ export default function AdminClient() {
         {/* Header */}
         <header className="flex h-18 items-center justify-between border-b border-[#282b31] bg-[#0e0f12] px-6 lg:px-8">
           <div>
-            <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-[#5f646e]">GoalVault operations</p>
+            <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-[#5f646e]">efChamps operations</p>
             <p className="mt-1 text-xs font-bold text-white">Production environment <span className="ml-2 text-[#00FF66]">• Healthy</span></p>
           </div>
           <div className="flex items-center gap-3">

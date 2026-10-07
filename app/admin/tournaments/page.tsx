@@ -60,7 +60,7 @@ export default function AdminTournamentsPage() {
                   <p className="font-bold text-white">{t.name}</p>
                   <p className="text-[9px] text-[#636872]">{t.format || "Single elimination"}</p>
                 </div>
-                <span className="font-bold text-white">{t.host?.username || "GoalVault Admin"}</span>
+                <span className="font-bold text-white">{t.host?.username || "efChamps Admin"}</span>
                 <div>
                   <p className="text-[#858a95]">{t.platform}</p>
                   <p className="text-[9px] text-[#636872]">{t.gameMode}</p>

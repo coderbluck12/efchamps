@@ -119,7 +119,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex items-center gap-3">
       <div className="relative flex size-10 items-center justify-center text-[#00FF66]">
-        <svg aria-label="GoalVault logo" fill="none" height="40" viewBox="0 0 40 40" width="40" xmlns="http://www.w3.org/2000/svg">
+        <svg aria-label="efChamps logo" fill="none" height="40" viewBox="0 0 40 40" width="40" xmlns="http://www.w3.org/2000/svg">
           <path d="M20 2 35 10v17L20 38 5 27V10L20 2Z" fill="#00FF66" fillOpacity=".08" stroke="#00FF66" strokeWidth="1.5" />
           <path d="M11 25V13h18v12M15 25v-8h10v8" stroke="#00FF66" strokeLinecap="square" strokeWidth="2" />
           <circle cx="20" cy="24" fill="#0C0D10" r="5" stroke="#00FF66" strokeWidth="1.5" />
@@ -128,7 +128,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
       </div>
       {!compact && (
         <div className="font-black tracking-[-0.045em] text-white">
-          GOAL<span className="text-[#00FF66]">VAULT</span>
+          EF<span className="text-[#00FF66]">CHAMPS</span>
           <span className="mt-0.5 block text-[6px] font-bold tracking-[0.28em] text-[#626771]">PLAY • PROVE • COLLECT</span>
         </div>
       )}

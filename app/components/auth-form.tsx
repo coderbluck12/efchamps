@@ -120,7 +120,7 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
         {/* Form Column */}
         <div className={`relative flex items-center justify-center bg-[#0C0D10] px-6 sm:px-12 lg:px-20 py-12 ${isLogin ? "order-2" : "order-1"}`}>
           <div className="absolute right-6 sm:right-10 top-8 text-xs text-[#666b75]">
-            {isLogin ? "New to GoalVault?" : "Already registered?"}{" "}
+            {isLogin ? "New to efChamps?" : "Already registered?"}{" "}
             <Link
               className="font-bold text-[#00FF66] hover:text-white"
               href={isLogin ? "/register" : "/login"}

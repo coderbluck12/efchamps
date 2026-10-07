@@ -1,7 +1,7 @@
 import MatchRoomClient from "./match-room-client";
 
 export const metadata = {
-  title: "Match Room // GoalVault",
+  title: "Match Room // efChamps",
 };
 
 export default async function MatchRoomPage({ params }: { params: Promise<{ id: string }> }) {

@@ -1136,12 +1136,12 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
       icon: "plus" as IconName,
       action: `Pay ₦${Number(depositAmount || 0).toLocaleString()} with Paystack`,
       success: "Funds added",
-      successCopy: `₦${Number(depositAmount || 0).toLocaleString()} has been credited to your available GoalVault balance.`,
+      successCopy: `₦${Number(depositAmount || 0).toLocaleString()} has been credited to your available efChamps balance.`,
     },
     withdraw: {
       eyebrow: "Wallet withdrawal",
       title: "Withdraw winnings",
-      copy: "Move available funds from your GoalVault wallet to your verified Nigerian bank account.",
+      copy: "Move available funds from your efChamps wallet to your verified Nigerian bank account.",
       icon: "wallet" as IconName,
       action: "Withdraw Funds",
       success: "Withdrawal requested",
@@ -1151,7 +1151,7 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
 
   const handlePaystackDeposit = (amount: number) => {
     const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_ad3318423a57a88f4333a2cdb89bab5d0c6acc83";
-    const userEmail = user?.email || "player@goalvault.com";
+    const userEmail = user?.email || "player@efchamps.com";
     const ref = "GV_" + Math.floor(Math.random() * 1000000000 + 1);
 
     const onPaymentSuccess = function (response: any) {

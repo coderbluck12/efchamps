@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GoalVault // Play • Prove • Collect",
+  title: "efChamps // Play • Prove • Collect",
   description: "Put real stakes behind your eFootball skill. Challenge verified players, settle results securely, and let every goal mean more.",
 };
 
