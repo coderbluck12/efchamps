@@ -23,6 +23,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
+      DATABASE_URL: postgresql://efchamps:efchamps_secure_password_2026@postgres:5432/efchamps_db
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USER: efchamps

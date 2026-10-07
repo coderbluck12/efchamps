@@ -27,13 +27,30 @@ import { SeedService } from './seed/seed.service';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const url = config.get<string>('DATABASE_URL');
+        const host = config.get<string>('DATABASE_HOST');
+        const port = Number(config.get<number>('DATABASE_PORT')) || 5432;
+        const username = config.get<string>('DATABASE_USER') || config.get<string>('DATABASE_USERNAME');
+        const password = config.get<string>('DATABASE_PASSWORD');
+        const database = config.get<string>('DATABASE_NAME') || config.get<string>('DATABASE_DB');
+
+        const isLocalOrDocker = host === 'postgres' || host === 'localhost' || (url && (url.includes('localhost') || url.includes('postgres')));
+
         return {
           type: 'postgres',
-          url,
-          // Neon PostgreSQL requires SSL
-          ssl: {
-            rejectUnauthorized: false,
-          },
+          ...(url
+            ? { url }
+            : {
+                host: host || 'postgres',
+                port,
+                username: username || 'efchamps',
+                password: password || 'efchamps_secure_password_2026',
+                database: database || 'efchamps_db',
+              }),
+          ssl: isLocalOrDocker
+            ? false
+            : {
+                rejectUnauthorized: false,
+              },
           entities: [
             User,
             Wallet,
