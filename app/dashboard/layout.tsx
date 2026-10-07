@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#0C0D10] text-white flex flex-col lg:flex-row pb-16 lg:pb-0">
+    <div className="relative min-h-screen max-w-[100vw] overflow-x-hidden bg-[#0C0D10] text-white flex flex-col lg:flex-row pb-16 lg:pb-0">
       {/* Desktop Sidebar (Hidden on mobile/tablet) */}
       <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-r border-[#282b31] bg-[#101115] px-5 py-6 min-h-screen">
         <div className="px-3">
@@ -111,16 +111,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Area */}
-      <div className="min-w-0 flex-1 flex flex-col">
+      <div className="min-w-0 flex-1 flex flex-col max-w-full overflow-x-hidden">
         {/* Top Navbar */}
-        <header className="flex h-16 sm:h-19 items-center justify-between border-b border-[#282b31] bg-[#0e0f12] px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="lg:hidden">
+        <header className="flex h-16 sm:h-19 items-center justify-between border-b border-[#282b31] bg-[#0e0f12] px-3 sm:px-6 lg:px-8 max-w-full">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="lg:hidden shrink-0">
               <Link href="/">
-                <Brand />
+                <Brand compact={false} />
               </Link>
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#5f646e]">Welcome back</p>
               <h2 className="mt-0.5 sm:mt-1 text-xs sm:text-sm font-bold text-white truncate max-w-[120px] sm:max-w-none">
                 {user?.username} <span className="ml-1 text-[#00FF66]">• Online</span>
@@ -128,28 +128,28 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Balance Badge */}
-            <div className="flex h-9 sm:h-11 items-center rounded-lg border border-[#292c32] bg-[#15171b] pl-2.5 sm:pl-4">
-              <div className="pr-2 sm:pr-4">
+            <div className="flex h-9 sm:h-11 items-center rounded-lg border border-[#292c32] bg-[#15171b] pl-2 sm:pl-4">
+              <div className="pr-1.5 sm:pr-3">
                 <p className="text-[7px] sm:text-[8px] font-bold uppercase tracking-[0.12em] text-[#5e636d]">Balance</p>
-                <p className="text-[11px] sm:text-xs font-bold text-white">
+                <p className="text-[10px] sm:text-xs font-bold text-white">
                   ₦{parseFloat((user?.wallet?.availableBalance as any) || "0").toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </p>
               </div>
               <button
-                className="flex h-full w-8 sm:w-10 items-center justify-center rounded-r-lg border-l border-[#292c32] text-[#00FF66] transition hover:bg-[#00FF66]/10"
+                className="flex h-full w-7 sm:w-10 items-center justify-center rounded-r-lg border-l border-[#292c32] text-[#00FF66] transition hover:bg-[#00FF66]/10"
                 onClick={() => setModal("funds")}
                 title="Add funds"
                 type="button"
               >
-                <Icon name="plus" size={15} />
+                <Icon name="plus" size={14} />
               </button>
             </div>
 
             {/* Create Challenge Button */}
-            <Button className="h-9 sm:h-11 px-3 sm:px-5 text-xs" onClick={() => setModal("challenge")}>
-              <Icon name="plus" size={15} /> <span className="hidden sm:inline">Create Challenge</span><span className="sm:hidden font-bold">Challenge</span>
+            <Button className="h-9 sm:h-11 px-2.5 sm:px-5 text-[11px] sm:text-xs" onClick={() => setModal("challenge")}>
+              <Icon name="plus" size={14} /> <span className="hidden sm:inline">Create Challenge</span><span className="sm:hidden font-bold">Play</span>
             </Button>
 
             {/* Logout Button */}
@@ -159,11 +159,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   logout();
                 }
               }}
-              className="flex h-9 sm:h-11 items-center justify-center rounded-lg border border-[#30343a] bg-[#14161a] px-2.5 sm:px-3 text-xs font-semibold text-[#8b909a] hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 transition"
+              className="flex h-9 sm:h-11 items-center justify-center rounded-lg border border-[#30343a] bg-[#14161a] px-2 sm:px-3 text-xs font-semibold text-[#8b909a] hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 transition"
               title="Log out of account"
               type="button"
             >
-              <Icon name="logout" size={15} />
+              <Icon name="logout" size={14} />
               <span className="hidden md:inline ml-1.5">Logout</span>
             </button>
           </div>

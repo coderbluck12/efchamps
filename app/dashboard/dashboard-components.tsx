@@ -212,31 +212,31 @@ export function ActiveStakesView() {
             return (
               <article className="relative overflow-hidden rounded-lg border border-[#2b2e34] bg-[#14161a]" key={stake.id}>
                 <div className="absolute inset-y-0 left-0 w-1 bg-[#00FF66]" />
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 p-4 sm:p-6">
                   <div className="flex items-center gap-4">
-                    <div className={`flex size-12 items-center justify-center rounded-full bg-gradient-to-br ${tone} text-xs font-black`}>{initials}</div>
-                    <div>
+                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${tone} text-xs font-black`}>{initials}</div>
+                    <div className="min-w-0">
                       <p className="text-[10px] uppercase tracking-[0.12em] text-[#626772]">You vs</p>
-                      <h3 className="mt-1 font-bold text-white">{opponent?.username || "Waiting for opponent..."}</h3>
+                      <h3 className="mt-1 font-bold text-white truncate max-w-[180px] sm:max-w-none">{opponent?.username || "Waiting for opponent..."}</h3>
                       <p className="mt-1 text-[10px] text-[#626772]">{stake.platform} • Division 2</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-6">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6 border-y border-white/5 py-3 lg:border-y-0 lg:py-0">
                     <div>
                       <p className="text-[9px] uppercase tracking-[0.13em] text-[#5e636e]">Your stake</p>
-                      <p className="mt-2 text-lg font-black text-white">₦{Number(stake.stakeAmount).toLocaleString()}</p>
+                      <p className="mt-1 sm:mt-2 text-sm sm:text-lg font-black text-white">₦{Number(stake.stakeAmount).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-[9px] uppercase tracking-[0.13em] text-[#5e636e]">Prize pool</p>
-                      <p className="mt-2 text-lg font-black text-[#00FF66]">₦{Number(stake.prizePool).toLocaleString()}</p>
+                      <p className="mt-1 sm:mt-2 text-sm sm:text-lg font-black text-[#00FF66]">₦{Number(stake.prizePool).toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-[9px] uppercase tracking-[0.13em] text-[#5e636e]">{stake.status}</p>
-                      <p className="mt-2 text-2xl font-black text-white">—</p>
+                      <p className="mt-1 sm:mt-2 text-sm sm:text-2xl font-black text-white">—</p>
                     </div>
                   </div>
-                  <Link href={`/match/${stake.id}`}>
-                    <Button className="h-10 px-4 text-xs" variant={index === 0 ? "primary" : "secondary"}>
+                  <Link href={`/match/${stake.id}`} className="w-full sm:w-auto">
+                    <Button className="h-10 px-4 text-xs w-full sm:w-auto justify-center" variant={index === 0 ? "primary" : "secondary"}>
                       Open Match Room
                     </Button>
                   </Link>
