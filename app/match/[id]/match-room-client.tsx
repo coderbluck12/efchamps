@@ -511,17 +511,18 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                  </div>
               </div>
 
-              {/* Live In-Match Chat */}
-              <div className="rounded-2xl border border-[#292c32] bg-[#14161a] p-4 sm:p-6 shadow-[0_0_25px_rgba(0,0,0,0.3)]">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 border-b border-[#292c32] pb-3 mb-3 sm:mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-[#00FF66] animate-pulse" />
-                    <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">Live Match Chat</h3>
+              {/* Live In-Match Chat - Rendered only when opponent has joined */}
+              {match.opponent ? (
+                <div className="rounded-2xl border border-[#292c32] bg-[#14161a] p-4 sm:p-6 shadow-[0_0_25px_rgba(0,0,0,0.3)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 border-b border-[#292c32] pb-3 mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full bg-[#00FF66] animate-pulse" />
+                      <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">Live Match Chat</h3>
+                    </div>
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-[#737883]">
+                      Coordinate match setup with @{match.opponent.username}
+                    </span>
                   </div>
-                  <span className="text-[9px] sm:text-[10px] font-semibold text-[#737883]">
-                    Coordinate match setup &amp; lobby invites
-                  </span>
-                </div>
 
                 {/* Messages stream */}
                 <div className="h-48 sm:h-60 overflow-y-auto rounded-xl border border-[#23262d] bg-[#0c0d10] p-3 sm:p-4 space-y-2.5 sm:space-y-3 mb-3 sm:mb-4 scroll-smooth">
@@ -623,6 +624,19 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                   </button>
                 </form>
               </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[#2b2e35] bg-[#14161a]/60 p-6 text-center">
+                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#1e2229] text-[#717682] mb-3">
+                    <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Live Chat Unlocks When Opponent Joins</h4>
+                  <p className="mt-1 text-[11px] text-[#717682]">
+                    Once a challenger accepts this match, the direct room chat will automatically appear here.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Sidebar Tools (Timer & Reporting) */}
