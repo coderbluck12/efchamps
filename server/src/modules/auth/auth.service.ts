@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,7 +14,7 @@ import { Wallet } from '../../entities/wallet.entity';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -21,6 +22,45 @@ export class AuthService {
     private readonly walletRepository: Repository<Wallet>,
     private readonly jwtService: JwtService,
   ) {}
+
+  async onModuleInit() {
+    await this.seedDefaultAdmin();
+  }
+
+  private async seedDefaultAdmin() {
+    try {
+      const adminExists = await this.userRepository.findOne({
+        where: [{ username: 'admin' }, { role: UserRole.ADMIN }],
+      });
+
+      if (!adminExists) {
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash('Admin@12345', salt);
+        const wallet = this.walletRepository.create({
+          availableBalance: 100000.0,
+          escrowLockedBalance: 0.0,
+          lifetimeWinnings: 0.0,
+          monthlyLimit: 1000000.0,
+          monthlyUsed: 0.0,
+        });
+
+        const admin = this.userRepository.create({
+          username: 'admin',
+          email: 'admin@efchamps.app',
+          passwordHash,
+          role: UserRole.ADMIN,
+          division: 'Division 1',
+          platform: 'PC' as any,
+          wallet,
+        });
+
+        await this.userRepository.save(admin);
+        console.log('Default administrator account created: admin / Admin@12345');
+      }
+    } catch (err) {
+      console.warn('Error verifying/seeding default admin account:', err);
+    }
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.userRepository.findOne({

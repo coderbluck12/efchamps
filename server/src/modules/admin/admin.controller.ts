@@ -47,4 +47,9 @@ export class AdminController {
   setMatchDuration(@Body('minutes') minutes: number) {
     return this.adminService.setMatchDuration(Number(minutes) || 6);
   }
+
+  @Post('update-role')
+  updateUserRole(@Body() body: { userId: string; role: string }) {
+    return this.adminService.updateUserRole(body.userId, body.role);
+  }
 }

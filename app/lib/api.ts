@@ -139,4 +139,9 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ minutes }),
     }),
+  updateUserRole: (userId: string, role: string) =>
+    apiRequest('/admin/update-role', {
+      method: 'POST',
+      body: JSON.stringify({ userId, role }),
+    }),
 };

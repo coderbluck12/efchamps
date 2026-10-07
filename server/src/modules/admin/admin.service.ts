@@ -106,4 +106,13 @@ export class AdminService {
     AdminService.currentMatchDurationMinutes = minutes;
     return { minutes: AdminService.currentMatchDurationMinutes };
   }
+
+  async updateUserRole(userId: string, role: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.role = role as any;
+    return this.userRepository.save(user);
+  }
 }
