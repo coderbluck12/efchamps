@@ -10,14 +10,34 @@ import { api } from "../lib/api";
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+    if (user.role !== "ADMIN") {
+      router.replace("/dashboard");
+      return;
+    }
     api.getAdminOverview()
       .then(setStats)
       .catch(() => {});
-  }, [pathname]);
+  }, [pathname, user, authLoading, router]);
+
+  if (authLoading || !user || user.role !== "ADMIN") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0C0D10] text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-8 animate-spin rounded-full border-2 border-[#00FF66] border-t-transparent" />
+          <p className="text-xs text-[#8d929d]">Verifying admin privileges...</p>
+        </div>
+      </div>
+    );
+  }
 
   const navigation: { label: string; href: string; icon: IconName; badge?: string }[] = [
     { label: "Overview", href: "/admin", icon: "grid" },

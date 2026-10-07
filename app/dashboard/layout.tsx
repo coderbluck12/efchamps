@@ -13,6 +13,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [modal, setModal] = useState<"funds" | "withdraw" | "challenge" | null>(null);
   const [activeMatch, setActiveMatch] = useState<any>(null);
+  const [counts, setCounts] = useState<{
+    openMatches: number;
+    activeStakes: number;
+    openTournaments: number;
+  }>({
+    openMatches: 0,
+    activeStakes: 0,
+    openTournaments: 0,
+  });
 
   useEffect(() => {
     if (!modal) refreshUser();
@@ -20,27 +29,47 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!user) return;
-    const checkActiveMatches = () => {
+    const fetchRealData = () => {
+      // 1. Check active match for banner & stakes count
       api.getMyActiveMatches()
         .then((matches: any[]) => {
-          if (matches && matches.length > 0) {
-            setActiveMatch(matches[0]);
+          const list = Array.isArray(matches) ? matches : [];
+          if (list.length > 0) {
+            setActiveMatch(list[0]);
           } else {
             setActiveMatch(null);
           }
+          setCounts((prev) => ({ ...prev, activeStakes: list.length }));
+        })
+        .catch(() => {});
+
+      // 2. Fetch real open matches count in lobby
+      api.getOpenMatches()
+        .then((open: any[]) => {
+          const count = Array.isArray(open) ? open.length : 0;
+          setCounts((prev) => ({ ...prev, openMatches: count }));
+        })
+        .catch(() => {});
+
+      // 3. Fetch real tournaments count
+      api.getTournaments()
+        .then((tList: any[]) => {
+          const list = Array.isArray(tList) ? tList : [];
+          const openTournaments = list.filter((t: any) => t.status === "OPEN").length;
+          setCounts((prev) => ({ ...prev, openTournaments: openTournaments || list.length }));
         })
         .catch(() => {});
     };
 
-    checkActiveMatches();
-    const interval = setInterval(checkActiveMatches, 4000);
+    fetchRealData();
+    const interval = setInterval(fetchRealData, 4000);
     return () => clearInterval(interval);
   }, [user, pathname]);
 
   const sidebar = [
-    { icon: "grid", label: "Match Lobby", href: "/dashboard", badge: "12" },
-    { icon: "stake", label: "My Active Stakes", href: "/dashboard/stakes", badge: "2" },
-    { icon: "crown", label: "Tournaments", href: "/dashboard/tournaments", badge: "5/8" },
+    { icon: "grid", label: "Match Lobby", href: "/dashboard", badge: counts.openMatches > 0 ? String(counts.openMatches) : undefined },
+    { icon: "stake", label: "My Active Stakes", href: "/dashboard/stakes", badge: counts.activeStakes > 0 ? String(counts.activeStakes) : undefined },
+    { icon: "crown", label: "Tournaments", href: "/dashboard/tournaments", badge: counts.openTournaments > 0 ? String(counts.openTournaments) : undefined },
     { icon: "wallet", label: "Secure Wallet", href: "/dashboard/wallet" },
     { icon: "leaderboard", label: "Leaderboard", href: "/dashboard/leaderboard" },
     { icon: "headset", label: "Support", href: "/dashboard/support" },
