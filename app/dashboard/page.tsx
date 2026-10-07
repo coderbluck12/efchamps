@@ -1,0 +1,1 @@
+import { LobbyView } from "./dashboard-components"; export default function Page() { return <LobbyView />; }

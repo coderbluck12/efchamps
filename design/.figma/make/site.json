@@ -1,0 +1,10 @@
+{
+  "description": "Engage in competitive eFootball staking with a sleek platform that allows users to place wagers, manage challenges, and track their performance seamlessly.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

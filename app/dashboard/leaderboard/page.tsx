@@ -1,0 +1,1 @@
+import { LeaderboardView } from "../dashboard-components"; export default function Page() { return <LeaderboardView />; }

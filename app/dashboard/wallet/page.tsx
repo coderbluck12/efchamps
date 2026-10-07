@@ -1,0 +1,1 @@
+import { WalletView } from "../dashboard-components"; export default function Page() { return <WalletView />; }

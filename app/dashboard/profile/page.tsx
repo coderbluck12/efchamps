@@ -1,0 +1,1 @@
+import { ProfileView } from "../dashboard-components"; export default function Page() { return <ProfileView />; }

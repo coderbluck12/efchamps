@@ -1,0 +1,1 @@
+import { SupportView } from "../dashboard-components"; export default function Page() { return <SupportView />; }
