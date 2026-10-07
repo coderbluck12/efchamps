@@ -499,12 +499,12 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                   <h3 className="text-sm font-black uppercase tracking-wider text-white">Report Match Score</h3>
                   {mySubmittedScore && (
                     <span className="rounded bg-[#00FF66]/10 px-2 py-0.5 text-[9px] font-bold text-[#00FF66]">
-                      Score Reported: {mySubmittedScore}
+                      Your Reported Result: {mySubmittedScore.replace(":", " • ")}
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-xs text-[#737883] mb-5">
-                  Enter the exact goals scored by each player. Both players must report the score to verify and release the prize pool.
+                  Enter only your own goals scored and select your match result (Won, Draw, or Lost). The system verifies both players&apos; submissions automatically.
                 </p>
 
                 {match.status === "COMPLETED" ? (() => {
@@ -566,12 +566,16 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
 
                     <div className="my-4 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-xs space-y-2">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-[#9ca3af]">Creator ({match.creator?.username}):</span>
-                        <span className="font-bold text-white">{match.creatorReportedScore || "N/A"}</span>
+                        <span className="text-[#9ca3af]">@{match.creator?.username} (Creator):</span>
+                        <span className="font-bold text-white font-mono">
+                          {match.creatorReportedScore ? match.creatorReportedScore.replace(":", " • ") : "No submission"}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-[#9ca3af]">Opponent ({match.opponent?.username || "N/A"}):</span>
-                        <span className="font-bold text-white">{match.opponentReportedScore || "N/A"}</span>
+                        <span className="text-[#9ca3af]">@{match.opponent?.username || "Opponent"}:</span>
+                        <span className="font-bold text-white font-mono">
+                          {match.opponentReportedScore ? match.opponentReportedScore.replace(":", " • ") : "No submission"}
+                        </span>
                       </div>
                     </div>
 
