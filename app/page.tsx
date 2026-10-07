@@ -1,25 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Brand, Button, Icon, type IconName } from "./components/ui";
+import { api } from "./lib/api";
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [matches, setMatches] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
-  const openMatches = [
-    { player: "RicoNXT", rank: "#128", platform: "PS5", stake: "₦5,000", pool: "₦9,000", initials: "RN", tone: "from-[#2643a2] to-[#69a7ff]" },
-    { player: "KairoFC", rank: "#084", platform: "Xbox", stake: "₦10,000", pool: "₦18,000", initials: "KF", tone: "from-[#7b2dcb] to-[#d47aff]" },
-    { player: "GoalGhost", rank: "#031", platform: "PC", stake: "₦20,000", pool: "₦36,000", initials: "GG", tone: "from-[#067456] to-[#35d3a1]" },
-  ];
+  useEffect(() => {
+    // 1. Fetch live open challenges
+    api.getOpenMatches()
+      .then((data) => {
+        if (Array.isArray(data)) setMatches(data);
+      })
+      .catch((err) => console.error("Error fetching landing matches:", err))
+      .finally(() => setLoadingMatches(false));
 
-  const topPlayers = [
-    ["01", "Mendoza10", "PS5", "94%", "₦1,840,000", "MD"],
-    ["02", "GoalGhost", "PC", "91%", "₦1,515,000", "GG"],
-    ["03", "KairoFC", "Xbox", "89%", "₦1,280,000", "KF"],
-    ["04", "RicoNXT", "PS5", "87%", "₦1,042,000", "RN"],
-    ["05", "VantaXI", "Mobile", "86%", "₦910,000", "VX"],
-  ];
+    // 2. Fetch live leaderboard players
+    api.getLeaderboard()
+      .then((data) => {
+        if (Array.isArray(data)) setLeaderboard(data);
+      })
+      .catch((err) => console.error("Error fetching landing leaderboard:", err))
+      .finally(() => setLoadingLeaderboard(false));
+  }, []);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0C0D10] text-white">
@@ -189,47 +198,135 @@ export default function HomePage() {
         <section className="py-16" id="lobby">
           <div className="mb-7 flex items-end justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.17em] text-[#00FF66]">Open now</p>
-              <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.04em] text-white">Featured stakes</h2>
+              <p className="text-[10px] font-black uppercase tracking-[0.17em] text-[#00FF66]">Live Arena</p>
+              <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.04em] text-white">Featured Stakes</h2>
             </div>
             <Link className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.13em] text-[#00FF66] hover:underline" href="/dashboard">
-              View all 12 challenges <Icon name="arrow" size={15} />
+              View all challenges ({matches.length}) <Icon name="arrow" size={15} />
             </Link>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {openMatches.map((match, index) => (
-              <article className={`relative overflow-hidden border bg-[#131519] p-5 rounded-lg ${index === 0 ? "border-[#00FF66]" : "border-[#2b2e34]"}`} key={match.player}>
-                {index === 0 && <span className="absolute right-0 top-0 bg-[#00FF66] px-2 py-1 text-[8px] font-black uppercase text-[#07140c]">Hot match</span>}
-                <div className={`flex size-12 items-center justify-center rounded-full bg-gradient-to-br ${match.tone} text-xs font-black`}>{match.initials}</div>
-                <div className="mt-5 flex items-start justify-between">
-                  <div>
-                    <h3 className="font-black text-white">{match.player}</h3>
-                    <p className="mt-1 text-[9px] font-semibold uppercase text-[#696e78]">{match.platform} • Rank {match.rank}</p>
+            {loadingMatches ? (
+              /* Skeleton Loader Grid */
+              Array.from({ length: 3 }).map((_, idx) => (
+                <article key={idx} className="relative overflow-hidden rounded-lg border border-[#23262d] bg-[#121418] p-5 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="size-12 rounded-full bg-[#242831]" />
+                    <div className="h-5 w-16 rounded bg-[#242831]" />
                   </div>
-                  <Icon name="controller" size={17} />
+                  <div className="mt-5 space-y-2">
+                    <div className="h-4 w-28 rounded bg-[#242831]" />
+                    <div className="h-3 w-20 rounded bg-[#1c1f26]" />
+                  </div>
+                  <div className="mt-6 grid grid-cols-2 border-y border-[#20232a] py-4 gap-4">
+                    <div className="space-y-1">
+                      <div className="h-2 w-10 rounded bg-[#1c1f26]" />
+                      <div className="h-5 w-16 rounded bg-[#242831]" />
+                    </div>
+                    <div className="space-y-1 border-l border-[#20232a] pl-4">
+                      <div className="h-2 w-12 rounded bg-[#1c1f26]" />
+                      <div className="h-5 w-16 rounded bg-[#242831]" />
+                    </div>
+                  </div>
+                  <div className="mt-4 h-10 w-full rounded-lg bg-[#242831]" />
+                </article>
+              ))
+            ) : matches.length === 0 ? (
+              /* Empty state if database has no active open challenges */
+              <div className="col-span-1 sm:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-[#2b2e35] bg-[#121418]/60 p-8 text-center flex flex-col items-center justify-center min-h-[260px]">
+                <div className="size-12 rounded-full bg-[#00FF66]/10 text-[#00FF66] flex items-center justify-center mb-3">
+                  <Icon name="controller" size={24} />
                 </div>
-                <div className="mt-6 grid grid-cols-2 border-y border-[#2a2d32] py-4">
-                  <div>
-                    <p className="text-[8px] uppercase text-[#60656f]">Entry</p>
-                    <p className="mt-1 text-lg font-black text-white">{match.stake}</p>
-                  </div>
-                  <div className="border-l border-[#2a2d32] pl-4">
-                    <p className="text-[8px] uppercase text-[#60656f]">Prize pool</p>
-                    <p className="mt-1 text-lg font-black text-[#00FF66]">{match.pool}</p>
-                  </div>
+                <h3 className="text-sm font-black uppercase text-white">No Open Challenges Right Now</h3>
+                <p className="mt-1 text-xs text-[#737883] max-w-sm">
+                  Be the first player to post a challenge in the arena. Lock your stake, share your room code, and take the prize pool!
+                </p>
+                <Button className="mt-4 h-10 px-6 text-xs" href="/dashboard">
+                  Create First Challenge →
+                </Button>
+              </div>
+            ) : (
+              /* Live Data Cards from Real Database */
+              matches.slice(0, 3).map((match, index) => {
+                const creator = match.creator?.username || "Player";
+                const initials = creator.substring(0, 2).toUpperCase();
+                const stake = Number(match.stakeAmount || 0).toLocaleString();
+                const pool = Number(match.prizePool || 0).toLocaleString();
+                const platform = match.platform || "PS5";
+
+                return (
+                  <article
+                    className={`relative overflow-hidden border bg-[#131519] p-5 rounded-lg transition hover:border-[#00FF66]/50 ${
+                      index === 0 ? "border-[#00FF66]/80 shadow-[0_0_20px_rgba(0,255,102,0.06)]" : "border-[#2b2e34]"
+                    }`}
+                    key={match.id}
+                  >
+                    {index === 0 && (
+                      <span className="absolute right-0 top-0 bg-[#00FF66] px-2 py-0.5 text-[8px] font-black uppercase text-[#07140c]">
+                        Featured Match
+                      </span>
+                    )}
+                    <div className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-[#1d4ed8] to-[#60a5fa] text-xs font-black text-white shadow-md">
+                      {initials}
+                    </div>
+                    <div className="mt-5 flex items-start justify-between">
+                      <div>
+                        <h3 className="font-black text-white truncate max-w-[140px]">@{creator}</h3>
+                        <p className="mt-1 text-[9px] font-semibold uppercase text-[#696e78]">
+                          {platform} • {match.format || "1v1 • 10m"}
+                        </p>
+                      </div>
+                      <span className="rounded bg-white/5 p-1.5 text-[#00FF66]">
+                        <Icon name="controller" size={16} />
+                      </span>
+                    </div>
+                    <div className="mt-6 grid grid-cols-2 border-y border-[#2a2d32] py-4">
+                      <div>
+                        <p className="text-[8px] uppercase tracking-wider text-[#60656f]">Entry Stake</p>
+                        <p className="mt-1 text-base font-black text-white">₦{stake}</p>
+                      </div>
+                      <div className="border-l border-[#2a2d32] pl-4">
+                        <p className="text-[8px] uppercase tracking-wider text-[#60656f]">Prize Pool</p>
+                        <p className="mt-1 text-base font-black text-[#00FF66]">₦{pool}</p>
+                      </div>
+                    </div>
+                    <Button className="mt-4 h-10 w-full text-[10px] font-bold" href={`/match/${match.id}`}>
+                      Accept Challenge →
+                    </Button>
+                  </article>
+                );
+              })
+            )}
+
+            {/* Platform Stats Card */}
+            <article className="relative overflow-hidden rounded-lg border border-[#2b2e34] bg-[#101416] p-6 flex flex-col justify-between">
+              <div className="absolute -bottom-20 -right-20 size-60 rounded-full bg-[#00FF66]/10 blur-3xl pointer-events-none" />
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#737a75]">Verified Community Pool</p>
+                <p className="mt-4 text-3xl sm:text-4xl lg:text-[40px] font-black tracking-[-0.05em] text-[#00FF66]">
+                  ₦24,820,000+
+                </p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#747a84]">Escrow Disbursed to Players</p>
+              </div>
+              <div className="mt-8">
+                <div className="flex items-end gap-1 h-14">
+                  {[28, 45, 35, 62, 48, 80, 66, 94, 75, 100].map((height, index) => (
+                    <span
+                      className={`w-full rounded-t-sm transition-all duration-300 ${
+                        index > 6 ? "bg-[#00FF66]" : "bg-[#252b27]"
+                      }`}
+                      key={index}
+                      style={{ height: `${height}%` }}
+                    />
+                  ))}
                 </div>
-                <Button className="mt-4 h-10 w-full text-[10px]" href="/dashboard">Accept challenge</Button>
-              </article>
-            ))}
-            <article className="relative overflow-hidden rounded-lg border border-[#2b2e34] bg-[#101416] p-6">
-              <div className="absolute -bottom-20 -right-20 size-60 rounded-full bg-[#00FF66]/10 blur-3xl" />
-              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#737a75]">Community prize pool</p>
-              <p className="mt-5 text-4xl lg:text-5xl font-black tracking-[-0.06em] text-[#00FF66]">₦24,820,000</p>
-              <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[#747a84]">Paid to winners this week</p>
-              <div className="mt-8 flex items-end gap-1">
-                {[28, 45, 35, 62, 48, 80, 66, 94, 75, 100].map((height, index) => (
-                  <span className={`w-full ${index > 6 ? "bg-[#00FF66]" : "bg-[#29312c]"}`} key={index} style={{ height }} />
-                ))}
+                <div className="mt-3 flex items-center justify-between text-[8px] uppercase font-bold text-[#555a64]">
+                  <span>Mon</span>
+                  <span>Wed</span>
+                  <span>Fri</span>
+                  <span className="text-[#00FF66]">Today</span>
+                </div>
               </div>
             </article>
           </div>
@@ -273,24 +370,64 @@ export default function HomePage() {
             <p className="text-right text-[10px] leading-4 text-[#656a74]">Rankings update after every<br />verified match result.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {topPlayers.map((player, index) => (
-              <article className={`relative rounded-lg border p-5 text-center ${index === 0 ? "border-[#00FF66]/50 bg-[#142019]" : "border-[#292c32] bg-[#121418]"}`} key={player[1]}>
-                <span className="absolute left-3 top-3 text-2xl font-black text-white/[0.06]">{player[0]}</span>
-                <div className={`mx-auto flex size-14 items-center justify-center rounded-full bg-[#282c33] text-xs font-black ${index === 0 ? "ring-2 ring-[#00FF66]" : ""}`}>{player[5]}</div>
-                <h3 className="mt-4 text-sm font-black text-white">{player[1]}</h3>
-                <p className="mt-1 text-[9px] text-[#686d77]">{player[2]} • Division 1</p>
-                <div className="mt-5 flex justify-center gap-5 border-t border-[#292c32] pt-4">
-                  <div>
-                    <p className="text-xs font-black text-[#00FF66]">{player[3]}</p>
-                    <p className="text-[7px] uppercase text-[#5d626c]">Wins</p>
+            {loadingLeaderboard ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <article key={idx} className="relative rounded-lg border border-[#26282f] bg-[#121418] p-5 text-center animate-pulse">
+                  <div className="mx-auto size-14 rounded-full bg-[#20232b]" />
+                  <div className="mt-4 mx-auto h-4 w-24 rounded bg-[#20232b]" />
+                  <div className="mt-2 mx-auto h-3 w-16 rounded bg-[#181a20]" />
+                  <div className="mt-5 grid grid-cols-2 gap-2 border-t border-[#20232a] pt-4">
+                    <div className="h-4 w-10 mx-auto rounded bg-[#20232b]" />
+                    <div className="h-4 w-12 mx-auto rounded bg-[#20232b]" />
                   </div>
-                  <div>
-                    <p className="text-xs font-black text-white">{player[4]}</p>
-                    <p className="text-[7px] uppercase text-[#5d626c]">Earned</p>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            ) : leaderboard.length === 0 ? (
+              <div className="col-span-full rounded-lg border border-[#2b2e35] bg-[#121418] p-8 text-center text-xs text-[#737883]">
+                Season rankings are compiling. Complete a verified match to secure your spot!
+              </div>
+            ) : (
+              leaderboard.slice(0, 5).map((player, index) => {
+                const rankNum = String(index + 1).padStart(2, "0");
+                const username = player.username || "Player";
+                const initials = username.substring(0, 2).toUpperCase();
+                const platform = player.platform || "PS5";
+                const winRate = `${player.winRate || 0}%`;
+                const earned = `₦${Number(player.winnings || player.wallet?.availableBalance || 0).toLocaleString()}`;
+
+                return (
+                  <article
+                    className={`relative rounded-lg border p-5 text-center transition hover:border-[#00FF66]/40 ${
+                      index === 0
+                        ? "border-[#00FF66]/50 bg-[#142019] shadow-[0_0_20px_rgba(0,255,102,0.08)]"
+                        : "border-[#292c32] bg-[#121418]"
+                    }`}
+                    key={player.id || username}
+                  >
+                    <span className="absolute left-3 top-3 text-2xl font-black text-white/[0.06]">{rankNum}</span>
+                    <div
+                      className={`mx-auto flex size-14 items-center justify-center rounded-full bg-[#282c33] text-xs font-black ${
+                        index === 0 ? "ring-2 ring-[#00FF66] bg-[#00FF66]/10 text-[#00FF66]" : "text-white"
+                      }`}
+                    >
+                      {initials}
+                    </div>
+                    <h3 className="mt-4 text-sm font-black text-white truncate">@{username}</h3>
+                    <p className="mt-1 text-[9px] text-[#686d77] uppercase">{platform} • Division 1</p>
+                    <div className="mt-5 flex justify-center gap-5 border-t border-[#292c32] pt-4">
+                      <div>
+                        <p className="text-xs font-black text-[#00FF66]">{winRate}</p>
+                        <p className="text-[7px] uppercase text-[#5d626c]">Win Rate</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-white">{earned}</p>
+                        <p className="text-[7px] uppercase text-[#5d626c]">Earned</p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            )}
           </div>
         </section>
 
