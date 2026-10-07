@@ -9,7 +9,7 @@ export const metadata = {
 export default function TermsPage() {
   return (
     <div className="relative min-h-screen bg-[#0C0D10] text-white">
-      {/* Background ambient glow */}
+      {/* Background ambient glowing */}
       <div className="pointer-events-none absolute right-[-150px] top-10 size-[600px] rounded-full bg-[#00FF66]/[0.04] blur-[140px]" />
 
       {/* Header */}
