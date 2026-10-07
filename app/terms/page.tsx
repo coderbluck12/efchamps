@@ -69,16 +69,52 @@ export default function TermsPage() {
           </section>
 
           {/* Section 3 */}
-          <section className="rounded-xl border border-[#292c32] bg-[#14161a] p-6 sm:p-8">
+          <section id="rules" className="rounded-xl border border-[#292c32] bg-[#14161a] p-6 sm:p-8">
             <h2 className="text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
-              <span className="text-[#00FF66]">03.</span> Peer-to-Peer Skill Gaming &amp; Escrow
+              <span className="text-[#00FF66]">03.</span> Skill-Based Tournaments, Matchmaking &amp; Prize Pools
             </h2>
-            <p className="mt-3">
-              efChamps is a peer-to-peer skill esports competition platform for verified eFootball matches. Match outcomes depend entirely on player skill, tactical proficiency, and sports gaming execution.
-            </p>
-            <p className="mt-3">
-              When a challenge is created or accepted, both players&apos; stakes are held safely in a <strong>cryptographically auditable escrow pool</strong>. Funds remain locked until both participants confirm the result or an administrative dispute review is finalized.
-            </p>
+            <div className="space-y-4 mt-4 text-[#a3abb8]">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">3.1 Skill-Based Competitions Only</h3>
+                <p className="mt-1">
+                  The <strong className="text-white">efChamps</strong> platform organizes, hosts, and facilitates competitive, peer-to-peer electronic sports (e-sports) tournaments and head-to-head matchmaking challenges (e.g., eFootball / digital football simulations). Participants explicitly acknowledge and agree that all competitions conducted on the platform are games of absolute skill. The outcome of any match depends entirely on the strategic knowledge, reaction times, mechanical precision, tactical acumen, and gaming execution of the individual competitors. The elements of chance, luck, or random distribution are entirely absent from the determination of match winners.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">3.2 No Bookmaking or Wagering</h3>
+                <p className="mt-1">
+                  The platform is <strong>not</strong> a bookmaker, sports betting operator, casino, or lottery company. efChamps does not set &quot;odds&quot;, issue betting slips, or accept wagers on the outcomes of external third-party sporting events. The platform operates strictly as an independent software utility, automated matchmaker, tournament manager, and neutral technical escrow arbiter for direct participants.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">3.3 Platform Entry Fees &amp; Escrow Prize Pools</h3>
+                <p className="mt-1">
+                  To participate in a competitive head-to-head match or tournament, players commit an Entry Fee to constitute a combined Prize Pool for that specific engagement:
+                </p>
+                <ul className="mt-2 list-disc pl-5 space-y-1.5 text-xs text-[#b8bdc7]">
+                  <li>By initiating or joining a match challenge, participants authorize efChamps to act as a secure, neutral digital escrow manager for their respective entry fees.</li>
+                  <li>Escrowed funds remain locked in secure custody until match completion.</li>
+                  <li>Upon the definitive conclusion of the match, as verified by the platform’s match reporting protocols, mutually signed score submissions, or official game data evidence, the total Prize Pool (minus a fixed platform administrative commission / service rake) is automatically and irrevocably disbursed into the internal wallet of the winning player.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">3.4 Wallet Funding &amp; Strict Closed-Loop Payouts</h3>
+                <p className="mt-1">
+                  Users fund their internal platform wallets using integrated, PCI-DSS compliant third-party payment gateways (e.g., Paystack) for the sole purpose of entering skill-based tournaments and peer-to-peer challenges.
+                </p>
+                <p className="mt-2">
+                  To prevent financial fraud, unauthorized chargebacks, and money laundering (AML), and to adhere strictly to financial regulatory compliance, efChamps enforces a <strong className="text-white">Strict Closed-Loop Withdrawal Policy</strong>:
+                </p>
+                <ul className="mt-2 list-disc pl-5 space-y-1.5 text-xs text-[#b8bdc7]">
+                  <li>Users may only withdraw tournament prize winnings to a verified personal commercial bank account in Nigeria.</li>
+                  <li>The legal name registered on the destination bank account <strong>must strictly match</strong> the exact verified Identity and Know-Your-Customer (KYC) records on their efChamps player profile.</li>
+                  <li>Withdrawals to third-party accounts, unverified accounts, or accounts bearing mismatched names are prohibited and will be rejected automatically.</li>
+                </ul>
+              </div>
+            </div>
           </section>
 
           {/* Section 4 */}
