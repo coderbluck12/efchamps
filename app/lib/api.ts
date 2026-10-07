@@ -1,4 +1,15 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // In the browser, always use relative '/api' so it talks directly to the current domain/IP
+  if (typeof window !== 'undefined') {
+    return '/api';
+  }
+  return 'http://localhost:4000/api';
+}
+
+const API_BASE = getApiBase();
 
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
