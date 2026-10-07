@@ -214,7 +214,16 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
                   />
                   <label className="flex gap-3 pt-1 text-xs leading-5 text-[#6f747e]">
                     <input className="mt-0.5 size-4 shrink-0 accent-[#00FF66]" defaultChecked type="checkbox" />
-                    I’m 18+ and agree to the Terms of Play and responsible gaming policy.
+                    <span>
+                      I’m 18+ and agree to the{" "}
+                      <Link href="/terms" className="font-semibold text-[#00FF66] hover:underline" target="_blank">
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link href="/privacy" className="font-semibold text-[#00FF66] hover:underline" target="_blank">
+                        Privacy Policy
+                      </Link>.
+                    </span>
                   </label>
                 </>
               )}

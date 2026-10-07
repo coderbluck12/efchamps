@@ -334,7 +334,7 @@ export default function HomePage() {
             <Brand />
             <p className="mt-4 max-w-[260px] text-[10px] leading-4 text-[#5f646e]">Competitive eFootball staking for players who back their game.</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 sm:gap-20 text-[10px]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-14 text-[10px]">
             <div>
               <p className="mb-4 font-black uppercase tracking-[0.14em] text-white">Platform</p>
               <div className="space-y-2 text-[#646973]">
@@ -352,7 +352,15 @@ export default function HomePage() {
               </div>
             </div>
             <div>
-              <p className="mb-4 font-black uppercase tracking-[0.14em] text-white">Staff</p>
+              <p className="mb-4 font-black uppercase tracking-[0.14em] text-white">Legal</p>
+              <div className="space-y-2 text-[#646973]">
+                <Link className="block hover:text-[#00FF66] transition" href="/terms">Terms &amp; Conditions</Link>
+                <Link className="block hover:text-[#00FF66] transition" href="/privacy">Privacy Policy</Link>
+                <Link className="block hover:text-white" href="/terms#rules">Fair Play Rules</Link>
+              </div>
+            </div>
+            <div>
+              <p className="mb-4 font-black uppercase tracking-[0.14em] text-white">Staff &amp; Access</p>
               <div className="space-y-2 text-[#646973]">
                 <Link className="block hover:text-[#00FF66]" href="/admin">Admin Console</Link>
                 <Link className="block hover:text-white" href="/login">Player Login</Link>
