@@ -1,7 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Brand, Button, Icon, type IconName } from "./components/ui";
 
 export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const openMatches = [
     { player: "RicoNXT", rank: "#128", platform: "PS5", stake: "₦5,000", pool: "₦9,000", initials: "RN", tone: "from-[#2643a2] to-[#69a7ff]" },
     { player: "KairoFC", rank: "#084", platform: "Xbox", stake: "₦10,000", pool: "₦18,000", initials: "KF", tone: "from-[#7b2dcb] to-[#d47aff]" },
@@ -22,39 +27,118 @@ export default function HomePage() {
       <div className="pointer-events-none absolute right-[-180px] top-20 size-[760px] rounded-full bg-[#00FF66]/[0.055] blur-[150px]" />
 
       {/* Navigation Header */}
-      <header className="relative z-20 mx-auto max-w-[1280px] px-6 mt-8 flex h-20 items-center justify-between border-b border-white/[0.07]">
+      <header className="relative z-30 mx-auto max-w-[1280px] px-4 sm:px-6 mt-4 sm:mt-8 flex h-16 sm:h-20 items-center justify-between border-b border-white/[0.07]">
         <Brand />
-        <nav className="hidden md:flex items-center gap-9 text-[11px] font-bold uppercase tracking-[0.11em] text-[#8d929d]">
+        <nav className="hidden md:flex items-center gap-7 lg:gap-9 text-[11px] font-bold uppercase tracking-[0.11em] text-[#8d929d]">
           <a className="border-b-2 border-[#00FF66] py-7 text-white" href="#home">Home</a>
           <a className="transition hover:text-white" href="#lobby">Live Lobby</a>
           <a className="transition hover:text-white" href="#leaderboards">Rankings</a>
           <a className="transition hover:text-white" href="#how-it-works">How it works</a>
           <Link className="transition hover:text-[#00FF66]" href="/admin">Admin Console</Link>
         </nav>
-        <div className="flex items-center gap-4">
-          <Button className="px-3 py-2 text-sm" href="/login" variant="ghost">Login</Button>
-          <Button className="h-11 px-6 text-sm" href="/register">Sign Up</Button>
+        <div className="hidden sm:flex items-center gap-3">
+          <Button className="px-3.5 py-2 text-xs" href="/login" variant="ghost">Login</Button>
+          <Button className="h-10 px-5 text-xs" href="/register">Sign Up</Button>
+        </div>
+
+        {/* Mobile menu hamburger button */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link href="/login" className="text-xs font-bold text-white px-2.5 py-1.5 rounded-lg border border-[#2b2e35] bg-[#14161a]">
+            Login
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex size-10 items-center justify-center rounded-lg border border-[#2b2e35] bg-[#14161a] text-white focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="size-5 text-[#00FF66]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            )}
+          </button>
         </div>
       </header>
 
+      {/* Mobile Drawer Navigation */}
+      {mobileMenuOpen && (
+        <div className="relative z-40 border-b border-[#292c32] bg-[#0f1115] px-6 py-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-200">
+          <nav className="flex flex-col gap-4 text-xs font-bold uppercase tracking-wider text-[#9ba0ab]">
+            <a
+              href="#home"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between border-b border-white/5 py-2 text-white"
+            >
+              <span>Home</span>
+              <span className="text-[#00FF66]">●</span>
+            </a>
+            <a
+              href="#lobby"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between border-b border-white/5 py-2 hover:text-white"
+            >
+              <span>Live Lobby</span>
+              <Icon name="arrow" size={14} />
+            </a>
+            <a
+              href="#leaderboards"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between border-b border-white/5 py-2 hover:text-white"
+            >
+              <span>Rankings</span>
+              <Icon name="arrow" size={14} />
+            </a>
+            <a
+              href="#how-it-works"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between border-b border-white/5 py-2 hover:text-white"
+            >
+              <span>How it works</span>
+              <Icon name="arrow" size={14} />
+            </a>
+            <Link
+              href="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between border-b border-white/5 py-2 text-[#00FF66]"
+            >
+              <span>Admin Console</span>
+              <Icon name="arrow" size={14} />
+            </Link>
+          </nav>
+          <div className="mt-6 flex flex-col gap-3">
+            <Button className="h-12 w-full text-xs" href="/register">
+              Create Player Account
+            </Button>
+            <Button className="h-12 w-full text-xs" href="/dashboard" variant="secondary">
+              Go to Match Lobby
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="relative z-10 mx-auto w-full max-w-[1280px] px-6">
+      <main className="relative z-10 mx-auto w-full max-w-[1280px] px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="grid min-h-[580px] grid-cols-1 lg:grid-cols-[48%_52%] items-center py-12" id="home">
+        <section className="grid min-h-[520px] sm:min-h-[580px] grid-cols-1 lg:grid-cols-[48%_52%] items-center py-8 sm:py-12" id="home">
           <div className="relative z-10">
-            <p className="mb-5 text-[11px] font-black uppercase tracking-[0.2em] text-[#00FF66]">The pitch is open // Season 08</p>
-            <h1 className="text-5xl sm:text-6xl lg:text-[76px] font-black uppercase leading-[0.9] tracking-[-0.065em] text-white">
+            <p className="mb-3 sm:mb-5 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-[#00FF66]">The pitch is open // Season 08</p>
+            <h1 className="text-4xl xs:text-5xl sm:text-6xl lg:text-[76px] font-black uppercase leading-[0.92] sm:leading-[0.9] tracking-[-0.05em] sm:tracking-[-0.065em] text-white">
               Own the match.
-              <span className="mt-3 block text-[#00FF66]">Take the pot.</span>
+              <span className="mt-2 sm:mt-3 block text-[#00FF66]">Take the pot.</span>
             </h1>
-            <p className="mt-8 max-w-[500px] text-base leading-7 text-[#969ba6]">
+            <p className="mt-5 sm:mt-8 max-w-[500px] text-sm sm:text-base leading-6 sm:leading-7 text-[#969ba6]">
               Put real stakes behind your eFootball skill. Challenge verified players, settle results securely, and let every goal mean more.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button className="h-14 px-8 text-sm" href="/dashboard">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <Button className="h-12 sm:h-14 px-6 sm:px-8 text-xs sm:text-sm w-full sm:w-auto justify-center" href="/dashboard">
                 Enter the live lobby <Icon name="arrow" size={18} />
               </Button>
-              <Button className="h-14 px-6 text-sm" href="#how-it-works" variant="secondary">
+              <Button className="h-12 sm:h-14 px-5 sm:px-6 text-xs sm:text-sm w-full sm:w-auto justify-center" href="#how-it-works" variant="secondary">
                 <Icon name="controller" size={18} /> See how it works
               </Button>
             </div>

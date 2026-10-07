@@ -74,7 +74,7 @@ export class WalletService {
     }
   }
 
-  async verifyPaystack(userId: string, reference: string) {
+  async verifyPaystack(userId: string, reference: string, fallbackAmount?: number) {
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
     let verifiedAmount = 0;
 
@@ -95,8 +95,8 @@ export class WalletService {
         throw new BadRequestException(err.message || 'Unable to verify transaction with Paystack');
       }
     } else {
-      // Development fallback if PAYSTACK_SECRET_KEY is not yet added in .env
-      verifiedAmount = 2500;
+      // Use exact amount requested by the user, fallback to 2500 only if undefined
+      verifiedAmount = fallbackAmount ? Number(fallbackAmount) : 2500;
     }
 
     // Check if reference was already credited

@@ -250,41 +250,41 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0C0D10] text-white">
-      <header className="flex h-16 items-center justify-between border-b border-[#292c32] bg-[#14161a] px-6">
-        <div className="flex items-center gap-4">
+      <header className="flex h-16 items-center justify-between border-b border-[#292c32] bg-[#14161a] px-4 sm:px-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link href="/dashboard" className="text-[#6c727f] hover:text-white">
-            <Icon name="arrow" size={20} className="rotate-180" />
+            <Icon name="arrow" size={18} className="rotate-180" />
           </Link>
           <Brand />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {isCreator && match.status === "OPEN" && !match.opponent && (
             <button
               type="button"
               onClick={handleCancelChallenge}
               disabled={cancellingChallenge}
-              className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition disabled:opacity-50"
+              className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 sm:px-3.5 py-1.5 text-[10px] sm:text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition disabled:opacity-50"
             >
-              {cancellingChallenge ? "Cancelling..." : "Cancel Challenge & Refund ₦" + Number(match.stakeAmount).toLocaleString()}
+              {cancellingChallenge ? "Cancelling..." : "Cancel Challenge"}
             </button>
           )}
-          <div className="rounded-full border border-[#00FF66]/20 bg-[#00FF66]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#00FF66]">
-            Match status: {match.status}
+          <div className="rounded-full border border-[#00FF66]/20 bg-[#00FF66]/10 px-2.5 sm:px-4 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#00FF66]">
+            {match.status}
           </div>
         </div>
       </header>
 
-      <main className="flex-1 px-6 py-10 lg:px-12 xl:px-20">
+      <main className="flex-1 px-4 sm:px-6 py-6 sm:py-10 lg:px-12 xl:px-20">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-black text-white">Official Match Room</h1>
-              <p className="mt-2 text-sm text-[#737883]">
+              <h1 className="text-2xl sm:text-3xl font-black text-white">Official Match Room</h1>
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-[#737883]">
                 Communicate, track progress, and submit results securely.
               </p>
             </div>
             {isCreator && match.status === "OPEN" && !match.opponent && (
-              <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 text-xs">
+              <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3.5 text-xs">
                 <span className="font-bold text-yellow-400">Waiting for Opponent</span>
                 <p className="text-[11px] text-[#9ca3af] mt-1">
                   You can cancel this open challenge at any time before an opponent joins to immediately reclaim your ₦{Number(match.stakeAmount).toLocaleString()} stake.
@@ -296,29 +296,29 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {/* Versus Banner */}
-              <div className="relative overflow-hidden rounded-2xl border border-[#292c32] bg-[#14161a] p-8">
+              <div className="relative overflow-hidden rounded-2xl border border-[#292c32] bg-[#14161a] p-5 sm:p-8">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-transparent to-red-900/10 pointer-events-none" />
                 <div className="flex items-center justify-between relative z-10">
-                  <div className="text-center">
-                    <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 text-xl font-black shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+                  <div className="text-center min-w-[70px]">
+                    <div className="mx-auto flex size-12 sm:size-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 text-base sm:text-xl font-black shadow-[0_0_20px_rgba(37,99,235,0.3)]">
                       {match.creator?.username?.substring(0, 2).toUpperCase()}
                     </div>
-                    <h3 className="mt-3 font-bold">{match.creator?.username}</h3>
-                    <p className="text-[10px] text-[#737883]">Creator</p>
+                    <h3 className="mt-2 sm:mt-3 text-xs sm:text-sm font-bold truncate max-w-[85px] sm:max-w-none">{match.creator?.username}</h3>
+                    <p className="text-[9px] sm:text-[10px] text-[#737883]">Creator</p>
                   </div>
                   
-                  <div className="text-center">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00FF66]">Prize Pool</p>
-                    <p className="text-3xl font-black text-white">₦{Number(match.prizePool).toLocaleString()}</p>
-                    <div className="mt-2 text-2xl font-black italic text-[#4b4e54]">VS</div>
+                  <div className="text-center px-2">
+                    <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-[#00FF66]">Prize Pool</p>
+                    <p className="text-xl sm:text-3xl font-black text-white">₦{Number(match.prizePool).toLocaleString()}</p>
+                    <div className="mt-1 sm:mt-2 text-lg sm:text-2xl font-black italic text-[#4b4e54]">VS</div>
                   </div>
 
-                  <div className="text-center">
-                    <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-400 text-xl font-black shadow-[0_0_20px_rgba(220,38,38,0.3)]">
+                  <div className="text-center min-w-[70px]">
+                    <div className="mx-auto flex size-12 sm:size-16 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-400 text-base sm:text-xl font-black shadow-[0_0_20px_rgba(220,38,38,0.3)]">
                       {match.opponent?.username?.substring(0, 2).toUpperCase() || "?"}
                     </div>
-                    <h3 className="mt-3 font-bold">{match.opponent?.username || "Waiting..."}</h3>
-                    <p className="text-[10px] text-[#737883]">Opponent</p>
+                    <h3 className="mt-2 sm:mt-3 text-xs sm:text-sm font-bold truncate max-w-[85px] sm:max-w-none">{match.opponent?.username || "Waiting..."}</h3>
+                    <p className="text-[9px] sm:text-[10px] text-[#737883]">Opponent</p>
                   </div>
                 </div>
               </div>

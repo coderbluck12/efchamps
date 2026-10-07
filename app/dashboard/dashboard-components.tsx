@@ -316,22 +316,26 @@ export function WalletView() { const [localModal, setLocalModal] = useState<Moda
           <h3 className="text-sm font-bold text-white">Recent activity</h3>
           <button className="text-[10px] font-bold text-[#00FF66]" type="button">View all transactions</button>
         </div>
-        {transactions.length === 0 ? (
-           <div className="p-6 text-center text-xs text-[#646973]">No recent transactions.</div>
-        ) : transactions.map((tx) => (
-          <div className="grid grid-cols-[1fr_140px_90px] sm:grid-cols-[1fr_160px_100px] items-center border-b border-[#25282d] px-6 py-4 last:border-b-0" key={tx.id}>
-            <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-md bg-white/[0.04] text-[#8c919b]">
-                <Icon name="stake" size={15} />
+        <div className="overflow-x-auto">
+          <div className="min-w-[480px]">
+            {transactions.length === 0 ? (
+              <div className="p-6 text-center text-xs text-[#646973]">No recent transactions.</div>
+            ) : transactions.map((tx) => (
+              <div className="grid grid-cols-[1fr_140px_90px] sm:grid-cols-[1fr_160px_100px] items-center border-b border-[#25282d] px-4 sm:px-6 py-4 last:border-b-0" key={tx.id}>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-md bg-white/[0.04] text-[#8c919b]">
+                    <Icon name="stake" size={15} />
+                  </div>
+                  <p className="text-xs font-semibold text-white truncate max-w-[160px] sm:max-w-none">{tx.type} • {tx.description || tx.type}</p>
+                </div>
+                <p className="text-[10px] text-[#646973]">{new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className={`text-right text-xs font-black ${parseFloat(tx.amount) > 0 ? "text-[#00FF66]" : "text-white"}`}>
+                  {parseFloat(tx.amount) > 0 ? "+" : ""}₦{parseFloat(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </p>
               </div>
-              <p className="text-xs font-semibold text-white">{tx.type} • {tx.description || tx.type}</p>
-            </div>
-            <p className="text-[10px] text-[#646973]">{new Date(tx.createdAt).toLocaleString()}</p>
-            <p className={`text-right text-xs font-black ${parseFloat(tx.amount) > 0 ? "text-[#00FF66]" : "text-white"}`}>
-              {parseFloat(tx.amount) > 0 ? "+" : ""}₦{parseFloat(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </p>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </>
   );
@@ -373,21 +377,25 @@ export function LeaderboardView() {
         )})}
       </div>
       <div className="mt-5 overflow-hidden rounded-lg border border-[#292c32] bg-[#121418]">
-        <div className="grid grid-cols-[50px_1fr_90px_90px_100px] sm:grid-cols-[70px_1fr_120px_120px_130px] bg-[#17191d] px-6 py-3 text-[9px] font-bold uppercase tracking-[0.13em] text-[#5f646e]">
-          <span>Rank</span><span>Player</span><span>Platform</span><span>Win rate</span><span className="text-right">Total won</span>
-        </div>
-        {leaders.map((player) => (
-          <div className={`grid grid-cols-[50px_1fr_90px_90px_100px] sm:grid-cols-[70px_1fr_120px_120px_130px] items-center border-t border-[#26292e] px-6 py-3.5 ${player.id === user?.id ? "bg-[#00FF66]/[0.06]" : ""}`} key={player.id}>
-            <span className={`text-xs font-black ${player.id === user?.id ? "text-[#00FF66]" : "text-[#727782]"}`}>#{player.rank}</span>
-            <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-full bg-[#2b2f36] text-[9px] font-black">{player.username.substring(0,2).toUpperCase()}</div>
-              <span className="text-xs font-bold text-white">{player.username} {player.id === user?.id && <span className="ml-1 text-[8px] text-[#00FF66]">YOU</span>}</span>
+        <div className="overflow-x-auto">
+          <div className="min-w-[520px]">
+            <div className="grid grid-cols-[60px_1fr_90px_90px_110px] sm:grid-cols-[70px_1fr_120px_120px_130px] bg-[#17191d] px-4 sm:px-6 py-3 text-[9px] font-bold uppercase tracking-[0.13em] text-[#5f646e]">
+              <span>Rank</span><span>Player</span><span>Platform</span><span>Win rate</span><span className="text-right">Total won</span>
             </div>
-            <span className="text-xs text-[#7b808a]">{player.platform}</span>
-            <span className="text-xs font-bold text-white">{player.winRate}</span>
-            <span className="text-right text-xs font-bold text-white">{String(player.lifetimeWinnings || "₦0").replace(/^\$/, "₦")}</span>
+            {leaders.map((player) => (
+              <div className={`grid grid-cols-[60px_1fr_90px_90px_110px] sm:grid-cols-[70px_1fr_120px_120px_130px] items-center border-t border-[#26292e] px-4 sm:px-6 py-3.5 ${player.id === user?.id ? "bg-[#00FF66]/[0.06]" : ""}`} key={player.id}>
+                <span className={`text-xs font-black ${player.id === user?.id ? "text-[#00FF66]" : "text-[#727782]"}`}>#{player.rank}</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-[#2b2f36] text-[9px] font-black">{player.username.substring(0,2).toUpperCase()}</div>
+                  <span className="text-xs font-bold text-white truncate max-w-[120px]">{player.username} {player.id === user?.id && <span className="ml-1 text-[8px] text-[#00FF66]">YOU</span>}</span>
+                </div>
+                <span className="text-xs text-[#7b808a]">{player.platform}</span>
+                <span className="text-xs font-bold text-white">{player.winRate}</span>
+                <span className="text-right text-xs font-bold text-white">{String(player.lifetimeWinnings || "₦0").replace(/^\$/, "₦")}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </>
   );
@@ -1157,7 +1165,7 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
     const onPaymentSuccess = function (response: any) {
       const reference = response?.reference || response?.trxref || ref;
       setLoading(true);
-      api.verifyPaystack(reference)
+      api.verifyPaystack(reference, amount)
         .then(async () => {
           await refreshUser();
           setComplete(true);

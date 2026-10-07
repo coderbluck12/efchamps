@@ -71,10 +71,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ amount, paymentMethod, reference }),
     }),
-  verifyPaystack: (reference: string) =>
+  verifyPaystack: (reference: string, amount?: number) =>
     apiRequest('/wallet/verify-paystack', {
       method: 'POST',
-      body: JSON.stringify({ reference }),
+      body: JSON.stringify({ reference, amount }),
     }),
   withdraw: (amount: number, destination?: string) =>
     apiRequest('/wallet/withdraw', {

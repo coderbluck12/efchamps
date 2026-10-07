@@ -26,8 +26,8 @@ export class WalletController {
   }
 
   @Post('verify-paystack')
-  verifyPaystack(@Request() req: any, @Body() dto: { reference: string }) {
-    return this.walletService.verifyPaystack(req.user.sub, dto.reference);
+  verifyPaystack(@Request() req: any, @Body() dto: { reference: string; amount?: number }) {
+    return this.walletService.verifyPaystack(req.user.sub, dto.reference, dto.amount);
   }
 
   @Post('withdraw')
