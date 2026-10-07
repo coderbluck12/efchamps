@@ -512,25 +512,39 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
               </div>
 
               {/* Live In-Match Chat */}
-              <div className="rounded-2xl border border-[#292c32] bg-[#14161a] p-6">
-                <div className="flex items-center justify-between border-b border-[#292c32] pb-3 mb-4">
+              <div className="rounded-2xl border border-[#292c32] bg-[#14161a] p-4 sm:p-6 shadow-[0_0_25px_rgba(0,0,0,0.3)]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 border-b border-[#292c32] pb-3 mb-3 sm:mb-4">
                   <div className="flex items-center gap-2">
                     <span className="size-2 rounded-full bg-[#00FF66] animate-pulse" />
-                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Live In-Match Chat</h3>
+                    <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">Live Match Chat</h3>
                   </div>
-                  <span className="text-[10px] font-semibold text-[#737883]">
-                    Chat with your opponent • Room messages are monitored
+                  <span className="text-[9px] sm:text-[10px] font-semibold text-[#737883]">
+                    Coordinate match setup &amp; lobby invites
                   </span>
                 </div>
 
                 {/* Messages stream */}
-                <div className="h-56 overflow-y-auto rounded-xl border border-[#23262d] bg-[#0c0d10] p-4 space-y-3 mb-4">
+                <div className="h-48 sm:h-60 overflow-y-auto rounded-xl border border-[#23262d] bg-[#0c0d10] p-3 sm:p-4 space-y-2.5 sm:space-y-3 mb-3 sm:mb-4 scroll-smooth">
                   {messages.length === 0 ? (
-                    <div className="flex h-full flex-col items-center justify-center text-center text-xs text-[#505561]">
-                      <svg className="size-8 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex h-full flex-col items-center justify-center text-center text-xs text-[#505561] px-2">
+                      <svg className="size-7 sm:size-8 mb-2 opacity-50 text-[#00FF66]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
-                      <p>No messages yet. Say hi to coordinate match setup!</p>
+                      <p className="text-[11px] sm:text-xs">No messages yet. Say hi to coordinate match setup!</p>
+                      <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+                        {["I'm ready!", "Send invite", "GL HF ⚽"].map((quickMsg) => (
+                          <button
+                            key={quickMsg}
+                            type="button"
+                            onClick={() => {
+                              setChatInput(quickMsg);
+                            }}
+                            className="rounded-full border border-[#2b2f38] bg-[#14161a] px-2.5 py-1 text-[9px] font-semibold text-[#8b919d] hover:border-[#00FF66] hover:text-[#00FF66]"
+                          >
+                            {quickMsg}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     messages.map((msg) => {
@@ -540,18 +554,18 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                           key={msg.id}
                           className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
                         >
-                          <div className="flex items-center gap-1.5 mb-1 text-[10px]">
+                          <div className="flex items-center gap-1.5 mb-0.5 text-[9px] sm:text-[10px]">
                             <span className={`font-bold ${isMe ? "text-[#00FF66]" : "text-[#9ca3af]"}`}>
                               {isMe ? "You" : `@${msg.sender?.username || "Opponent"}`}
                             </span>
-                            <span className="text-[9px] text-[#555a66]">
+                            <span className="text-[8px] sm:text-[9px] text-[#555a66]">
                               {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
                           <div
-                            className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
+                            className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-3 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs leading-relaxed break-words whitespace-pre-wrap ${
                               isMe
-                                ? "bg-[#00FF66] text-[#05160b] font-medium rounded-tr-none"
+                                ? "bg-[#00FF66] text-[#05160b] font-semibold rounded-tr-none shadow-[0_2px_10px_rgba(0,255,102,0.15)]"
                                 : "bg-[#1c1f26] text-white border border-[#2c3039] rounded-tl-none"
                             }`}
                           >
@@ -563,26 +577,48 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                   )}
                 </div>
 
+                {/* Quick suggestions bar on mobile */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 sm:hidden text-[9px] text-[#737883] no-scrollbar">
+                  {["I'm ready", "Invite sent", "Ready for rematch?", "GG!"].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setChatInput(preset)}
+                      className="shrink-0 rounded-full border border-[#2b2f38] bg-[#0c0d10] px-2.5 py-1 font-medium text-[#8c929e] active:scale-95 hover:text-white"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Message input */}
-                <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Send a message to your opponent (e.g. 'Invite sent in-game', 'GG')..."
-                    className="flex-1 rounded-xl border border-[#2b2f38] bg-[#090a0d] px-4 py-2.5 text-xs text-white placeholder-[#505561] focus:border-[#00FF66] focus:outline-none"
-                    maxLength={500}
-                    disabled={sendingChat}
-                  />
+                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Type a message (e.g. 'Invite sent', 'GG')..."
+                      className="w-full rounded-xl border border-[#2b2f38] bg-[#090a0d] px-3.5 py-2.5 text-xs text-white placeholder-[#505561] focus:border-[#00FF66] focus:outline-none"
+                      maxLength={500}
+                      disabled={sendingChat}
+                    />
+                  </div>
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || sendingChat}
-                    className="flex h-10 px-5 items-center justify-center gap-1.5 rounded-xl bg-[#00FF66] text-xs font-black uppercase tracking-wider text-[#06150c] transition hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex h-10 shrink-0 px-3.5 sm:px-5 items-center justify-center gap-1.5 rounded-xl bg-[#00FF66] text-xs font-black uppercase tracking-wider text-[#06150c] transition hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Send message"
                   >
                     {sendingChat ? (
                       <span className="size-3.5 animate-spin rounded-full border-2 border-black border-t-transparent" />
                     ) : (
-                      <span>Send</span>
+                      <>
+                        <span className="hidden sm:inline">Send</span>
+                        <svg className="size-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </>
                     )}
                   </button>
                 </form>
