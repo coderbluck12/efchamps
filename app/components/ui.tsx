@@ -210,12 +210,14 @@ export function Field({
 
 export function SelectField({
   label = "Platform",
+  name,
   options = ["PS5", "Xbox", "PC", "Mobile"],
   placeholder = "Select your platform",
   value,
   onChange,
 }: {
   label?: string;
+  name?: string;
   options?: string[];
   placeholder?: string;
   value?: string;
@@ -226,8 +228,9 @@ export function SelectField({
       <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.13em] text-[#888d98]">{label}</span>
       <div className="relative">
         <select
+          name={name}
           className="h-13 w-full appearance-none rounded-lg border border-[#2a2d33] bg-[#0d0f12] px-4 text-sm text-[#d8dbe1] outline-none transition focus:border-[#00FF66] focus:ring-2 focus:ring-[#00FF66]/10"
-          defaultValue=""
+          defaultValue={options[0] || ""}
           onChange={onChange}
           value={value}
         >

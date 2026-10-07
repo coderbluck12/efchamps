@@ -1251,7 +1251,13 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
                 const formData = new FormData(event.target);
                 if (type === "challenge") {
                   const amt = parseFloat(formData.get("amount") as string || "1000");
-                  const created = await api.createMatch({ platform: "Cross-play", stakeAmount: amt, format: "1v1 • 10 min", teamRules: "Standard teams" });
+                  const selectedPlatform = (formData.get("platform") as string) || "PS5";
+                  const created = await api.createMatch({
+                    platform: selectedPlatform,
+                    stakeAmount: amt,
+                    format: (formData.get("format") as string) || "1v1 • 10 min",
+                    teamRules: (formData.get("teamRules") as string) || "Standard teams"
+                  });
                   await refreshUser();
                   if (created?.id) {
                     onClose();
@@ -1277,8 +1283,14 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
             }}>
               {type === "challenge" && (
                 <>
-                  <div className="grid grid-cols-2 gap-4"><SelectField /><Field label="Entry Stake (₦)" name="amount" placeholder="1000" /></div>
-                  <div className="grid grid-cols-2 gap-4"><Field label="Match Time" placeholder="10 minutes" /><Field label="Team Rules" placeholder="Standard teams" /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <SelectField name="platform" options={["PS5", "Xbox", "PC", "Mobile"]} />
+                    <Field label="Entry Stake (₦)" name="amount" placeholder="1000" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Match Time" name="format" placeholder="10 minutes" />
+                    <Field label="Team Rules" name="teamRules" placeholder="Standard teams" />
+                  </div>
                   <label className="block">
                     <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.13em] text-[#888d98]">Challenge visibility</span>
                     <select className="h-13 w-full rounded-lg border border-[#2a2d33] bg-[#0d0f12] px-4 text-sm text-[#d8dbe1] outline-none focus:border-[#00FF66]"><option>Public lobby</option><option>Invite only</option></select>
