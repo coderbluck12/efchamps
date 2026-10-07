@@ -50,9 +50,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#0C0D10] text-white flex flex-col lg:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full lg:w-[250px] shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#282b31] bg-[#0f1114] px-5 py-6 lg:min-h-screen">
+    <div className="relative min-h-screen max-w-[100vw] overflow-x-hidden bg-[#0C0D10] text-white flex flex-col lg:flex-row pb-16 lg:pb-0">
+      {/* Desktop Sidebar (Hidden on mobile/tablet) */}
+      <aside className="hidden lg:flex w-[250px] shrink-0 flex-col border-r border-[#282b31] bg-[#0f1114] px-5 py-6 min-h-screen">
         <div className="px-3">
           <Link href="/">
             <Brand />
@@ -61,8 +61,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             Admin access
           </div>
         </div>
-        <p className="mb-3 mt-8 lg:mt-9 px-3 text-[8px] font-black uppercase tracking-[0.17em] text-[#4f545e]">Operations</p>
-        <nav className="space-y-1 flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible">
+        <p className="mb-3 mt-9 px-3 text-[8px] font-black uppercase tracking-[0.17em] text-[#4f545e]">Operations</p>
+        <nav className="space-y-1 flex flex-col">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="mt-auto hidden lg:block rounded-lg border border-[#332f25] bg-[#17150f] p-4">
+        <div className="mt-auto rounded-lg border border-[#332f25] bg-[#17150f] p-4">
           <p className="text-[8px] font-black uppercase tracking-[0.13em] text-[#f59e0b]">Audit mode enabled</p>
           <p className="mt-2 text-[9px] leading-4 text-[#797363]">Every administrative action is connected directly to your active database session.</p>
         </div>
@@ -101,22 +101,29 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="min-w-0 flex-1 flex flex-col">
+      <div className="min-w-0 flex-1 flex flex-col max-w-full overflow-x-hidden">
         {/* Header */}
-        <header className="flex h-18 items-center justify-between border-b border-[#282b31] bg-[#0e0f12] px-6 lg:px-8">
-          <div>
-            <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-[#5f646e]">efChamps operations</p>
-            <p className="mt-1 text-xs font-bold text-white">Live Database Connected <span className="ml-2 text-[#00FF66]">• Healthy</span></p>
+        <header className="flex h-16 sm:h-18 items-center justify-between border-b border-[#282b31] bg-[#0e0f12] px-3 sm:px-6 lg:px-8 max-w-full">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="lg:hidden shrink-0">
+              <Link href="/">
+                <Brand />
+              </Link>
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-[#5f646e]">efChamps operations</p>
+              <p className="mt-0.5 text-xs font-bold text-white">Live Database Connected <span className="ml-1.5 text-[#00FF66]">• Healthy</span></p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link href="/dashboard">
-              <Button variant="secondary" className="h-9 px-3 text-[10px]">
-                Exit to User Dashboard
+              <Button variant="secondary" className="h-8 sm:h-9 px-2.5 sm:px-3 text-[10px]">
+                ← <span className="hidden xs:inline ml-1">Dashboard</span>
               </Button>
             </Link>
-            <div className="rounded-lg border border-[#2b2e34] bg-[#15171b] px-4 py-2">
-              <p className="text-[8px] uppercase tracking-[0.12em] text-[#5f646e]">Total Gross Volume</p>
-              <p className="mt-1 text-xs font-black text-white">
+            <div className="rounded-lg border border-[#2b2e34] bg-[#15171b] px-2.5 sm:px-4 py-1.5 sm:py-2">
+              <p className="text-[7px] sm:text-[8px] uppercase tracking-[0.12em] text-[#5f646e]">Gross Volume</p>
+              <p className="text-[11px] sm:text-xs font-black text-white">
                 ₦{Number(stats?.grossVolume || 0).toLocaleString()}
               </p>
             </div>
@@ -124,10 +131,36 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* View Body */}
-        <main className="flex-1 px-6 lg:px-8 py-7 overflow-y-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-7 overflow-y-auto">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar for Admin Console */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-[#282b31] bg-[#101115]/95 backdrop-blur-md px-1 lg:hidden">
+        {navigation.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`flex flex-col items-center justify-center gap-1 py-1 px-1.5 min-w-[44px] text-[9px] font-bold transition ${
+                isActive ? "text-[#00FF66]" : "text-[#7b808c] hover:text-white"
+              }`}
+            >
+              <div className="relative">
+                <Icon name={item.icon} size={18} />
+                {item.badge && (
+                  <span className="absolute -top-1.5 -right-2 flex size-3.5 items-center justify-center rounded-full bg-[#00FF66] text-[7px] font-black text-black">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              <span className="truncate max-w-[48px]">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
