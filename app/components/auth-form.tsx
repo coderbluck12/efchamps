@@ -20,12 +20,19 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [platform, setPlatform] = useState("PS5");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
+
+    if (!isLogin && !acceptedTerms) {
+      setError("You must read and agree to the Terms of Service and Privacy Policy to register.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -212,15 +219,21 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
                     value={platform}
                     onChange={(e) => setPlatform(e.target.value)}
                   />
-                  <label className="flex gap-3 pt-1 text-xs leading-5 text-[#6f747e]">
-                    <input className="mt-0.5 size-4 shrink-0 accent-[#00FF66]" defaultChecked type="checkbox" />
+                  <label className="flex items-start gap-3 pt-1 text-xs leading-5 text-[#8b919d] cursor-pointer select-none">
+                    <input
+                      className="mt-1 size-4 shrink-0 rounded accent-[#00FF66] cursor-pointer"
+                      type="checkbox"
+                      required
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    />
                     <span>
                       I’m 18+ and agree to the{" "}
-                      <Link href="/terms" className="font-semibold text-[#00FF66] hover:underline" target="_blank">
+                      <Link href="/terms" className="font-semibold text-[#00FF66] hover:underline" target="_blank" rel="noopener noreferrer">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/privacy" className="font-semibold text-[#00FF66] hover:underline" target="_blank">
+                      <Link href="/privacy" className="font-semibold text-[#00FF66] hover:underline" target="_blank" rel="noopener noreferrer">
                         Privacy Policy
                       </Link>.
                     </span>
