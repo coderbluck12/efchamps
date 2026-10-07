@@ -2,8 +2,16 @@ import Link from "next/link";
 import { Brand, Button, Icon } from "../components/ui";
 
 export const metadata = {
-  title: "Terms and Conditions // efChamps",
-  description: "Official Terms and Conditions, rules of engagement, stake settlement policies, and fair play standards for efChamps.",
+  title: "Terms & Conditions // efChamps",
+  description: "Official Terms and Conditions, skill gaming regulations, escrow stake settlement policies, and fair play standards for efChamps.",
+  alternates: {
+    canonical: "/terms",
+  },
+  openGraph: {
+    title: "Terms & Conditions // efChamps",
+    description: "Official rules of play, skill tournament rules, and escrow prize pool policies on efChamps.",
+    url: "/terms",
+  },
 };
 
 export default function TermsPage() {

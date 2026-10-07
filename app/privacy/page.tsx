@@ -3,7 +3,15 @@ import { Brand, Button, Icon } from "../components/ui";
 
 export const metadata = {
   title: "Privacy Policy // efChamps",
-  description: "Official Privacy Policy for efChamps. Learn how we handle your data, payment security, gamer credentials, and privacy rights.",
+  description: "Official Privacy Policy for efChamps. Learn how we handle gamer identities, Paystack payment data, encryption, and your privacy rights under NDPR.",
+  alternates: {
+    canonical: "/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy // efChamps",
+    description: "Data protection standards, encrypted sessions, and payment confidentiality on efChamps.",
+    url: "/privacy",
+  },
 };
 
 export default function PrivacyPage() {
