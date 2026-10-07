@@ -2,7 +2,7 @@ import AuthPage from "../components/auth-form";
 
 export const metadata = {
   title: "Create Player Account // efChamps",
-  description: "Register your efChamps identity and claim your ₦5,000 first-match credit.",
+  description: "Register your efChamps identity, choose your gaming platform, and enter competitive skill tournaments.",
 };
 
 export default function RegisterPage() {

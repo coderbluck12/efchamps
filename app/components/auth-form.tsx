@@ -44,7 +44,7 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
         }, 800);
       } else {
         await register({ username, email, password, platform });
-        submit("Registration completed! ₦5,000 bonus unlocked!");
+        submit("Registration completed! Redirecting to lobby...");
         setTimeout(() => {
           window.location.href = "/dashboard";
         }, 800);
@@ -142,7 +142,7 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
                 <Icon name={isLogin ? "lock" : "controller"} size={22} />
               </div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#00FF66]">
-                {isLogin ? "Welcome back" : "₦5,000 first-match credit"}
+                {isLogin ? "Welcome back" : "Join the Arena"}
               </p>
               <h2 className="text-3xl sm:text-[42px] font-black tracking-[-0.04em] text-white">
                 {isLogin ? "Sign in" : "Create account"}
@@ -245,7 +245,7 @@ export default function AuthPage({ mode = "login" }: { mode?: "login" | "registe
                 {loading ? "Processing..." : isLogin ? (
                   <><Icon name="shield" size={18} /> Secure Login</>
                 ) : (
-                  <>Register &amp; Claim Bonus <Icon name="arrow" size={18} /></>
+                  <>Create Account <Icon name="arrow" size={18} /></>
                 )}
               </Button>
             </form>
