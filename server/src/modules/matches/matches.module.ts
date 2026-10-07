@@ -5,13 +5,14 @@ import { User } from '../../entities/user.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { MatchDispute } from '../../entities/dispute.entity';
 import { PlatformSetting } from '../../entities/platform-setting.entity';
+import { MatchMessage } from '../../entities/match-message.entity';
 import { MatchesService } from './matches.service';
 import { MatchesController } from './matches.controller';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Match, User, Wallet, MatchDispute, PlatformSetting]),
+    TypeOrmModule.forFeature([Match, User, Wallet, MatchDispute, PlatformSetting, MatchMessage]),
     AuthModule,
   ],
   controllers: [MatchesController],

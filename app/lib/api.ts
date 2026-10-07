@@ -109,6 +109,13 @@ export const api = {
     }),
   cancelMatch: (matchId: string) =>
     apiRequest(`/matches/${matchId}`, { method: 'DELETE' }),
+  getMatchMessages: (matchId: string) =>
+    apiRequest(`/matches/${matchId}/messages`),
+  sendMatchMessage: (matchId: string, content: string) =>
+    apiRequest(`/matches/${matchId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
 
   // Tournaments
   getTournaments: (status?: string) =>

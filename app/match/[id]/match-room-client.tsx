@@ -28,6 +28,36 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
   const [disputeRules, setDisputeRules] = useState<string>("");
   const [cancellingChallenge, setCancellingChallenge] = useState(false);
 
+  // In-Match Chat state
+  const [messages, setMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState<string>("");
+  const [sendingChat, setSendingChat] = useState<boolean>(false);
+
+  const fetchMessages = () => {
+    if (!matchId) return;
+    api.getMatchMessages(matchId)
+      .then((data) => {
+        if (Array.isArray(data)) setMessages(data);
+      })
+      .catch(() => {});
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatInput.trim() || sendingChat) return;
+    const text = chatInput.trim();
+    setChatInput("");
+    setSendingChat(true);
+    try {
+      await api.sendMatchMessage(matchId, text);
+      fetchMessages();
+    } catch (err: any) {
+      alert(err.message || "Failed to send message");
+    } finally {
+      setSendingChat(false);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files).slice(0, 5); // Allow up to 5 screenshots
@@ -84,7 +114,11 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
   useEffect(() => {
     if (user) {
       fetchMatch();
-      const interval = setInterval(fetchMatch, 5000);
+      fetchMessages();
+      const interval = setInterval(() => {
+        fetchMatch();
+        fetchMessages();
+      }, 4000);
       return () => clearInterval(interval);
     }
   }, [user, matchId]);
@@ -476,6 +510,83 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                     </div>
                  </div>
               </div>
+
+              {/* Live In-Match Chat */}
+              <div className="rounded-2xl border border-[#292c32] bg-[#14161a] p-6">
+                <div className="flex items-center justify-between border-b border-[#292c32] pb-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-[#00FF66] animate-pulse" />
+                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Live In-Match Chat</h3>
+                  </div>
+                  <span className="text-[10px] font-semibold text-[#737883]">
+                    Chat with your opponent • Room messages are monitored
+                  </span>
+                </div>
+
+                {/* Messages stream */}
+                <div className="h-56 overflow-y-auto rounded-xl border border-[#23262d] bg-[#0c0d10] p-4 space-y-3 mb-4">
+                  {messages.length === 0 ? (
+                    <div className="flex h-full flex-col items-center justify-center text-center text-xs text-[#505561]">
+                      <svg className="size-8 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      <p>No messages yet. Say hi to coordinate match setup!</p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isMe = msg.sender?.id === user?.id;
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                        >
+                          <div className="flex items-center gap-1.5 mb-1 text-[10px]">
+                            <span className={`font-bold ${isMe ? "text-[#00FF66]" : "text-[#9ca3af]"}`}>
+                              {isMe ? "You" : `@${msg.sender?.username || "Opponent"}`}
+                            </span>
+                            <span className="text-[9px] text-[#555a66]">
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <div
+                            className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
+                              isMe
+                                ? "bg-[#00FF66] text-[#05160b] font-medium rounded-tr-none"
+                                : "bg-[#1c1f26] text-white border border-[#2c3039] rounded-tl-none"
+                            }`}
+                          >
+                            {msg.content}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Message input */}
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Send a message to your opponent (e.g. 'Invite sent in-game', 'GG')..."
+                    className="flex-1 rounded-xl border border-[#2b2f38] bg-[#090a0d] px-4 py-2.5 text-xs text-white placeholder-[#505561] focus:border-[#00FF66] focus:outline-none"
+                    maxLength={500}
+                    disabled={sendingChat}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim() || sendingChat}
+                    className="flex h-10 px-5 items-center justify-center gap-1.5 rounded-xl bg-[#00FF66] text-xs font-black uppercase tracking-wider text-[#06150c] transition hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingChat ? (
+                      <span className="size-3.5 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                    ) : (
+                      <span>Send</span>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
 
             {/* Sidebar Tools (Timer & Reporting) */}
@@ -491,6 +602,10 @@ export default function MatchRoomClient({ matchId }: { matchId: string }) {
                     ? "Time has completed! You may now submit your final match score."
                     : `Matches must be played. Result reporting unlocks in ${formatTimer(timeLeft)}.`}
                 </p>
+                <div className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-[#00FF66]/20 bg-[#00FF66]/5 px-3 py-1.5 text-[10px] text-[#00FF66]">
+                  <Icon name="shield" size={13} />
+                  <span>Auto-Forfeit Active: Unresponsive opponents forfeit automatically after match timer expires.</span>
+                </div>
               </div>
 
               {/* Score Reporting */}

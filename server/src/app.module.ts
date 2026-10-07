@@ -9,6 +9,7 @@ import { MatchDispute } from './entities/dispute.entity';
 import { Tournament } from './entities/tournament.entity';
 import { PlatformSetting } from './entities/platform-setting.entity';
 import { TournamentParticipant } from './entities/tournament-participant.entity';
+import { MatchMessage } from './entities/match-message.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { MatchesModule } from './modules/matches/matches.module';
@@ -62,6 +63,7 @@ import { SeedService } from './seed/seed.service';
             Tournament,
             TournamentParticipant,
             PlatformSetting,
+            MatchMessage,
           ],
           synchronize: true, // Automatically synchronize database schema in development
           logging: config.get<string>('NODE_ENV') === 'development',
@@ -84,6 +86,7 @@ import { SeedService } from './seed/seed.service';
       Tournament,
       TournamentParticipant,
       PlatformSetting,
+      MatchMessage,
     ]),
   ],
   providers: [SeedService],

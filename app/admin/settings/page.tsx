@@ -7,6 +7,7 @@ import { ViewHeading } from "../page";
 
 export default function AdminSettingsPage() {
   const [duration, setDuration] = useState<number>(6);
+  const [autoForfeitMinutes, setAutoForfeitMinutes] = useState<number>(5);
   const [feePercentage, setFeePercentage] = useState<number>(10);
   const [disputeRules, setDisputeRules] = useState<string>("Clear in-game final whistle screenshot or recording showing final score, Konami ID/PSN/Gamertag, and match stats. Uncropped, unedited JPG/PNG only.");
   const [acceptedFormats, setAcceptedFormats] = useState<string>("JPG, PNG, WEBP (Max 10MB per image)");
@@ -17,6 +18,7 @@ export default function AdminSettingsPage() {
     api.getAdminSettings()
       .then((settings: any) => {
         if (settings?.DEFAULT_MATCH_DURATION_MINUTES) setDuration(Number(settings.DEFAULT_MATCH_DURATION_MINUTES));
+        if (settings?.AUTO_FORFEIT_GRACE_MINUTES) setAutoForfeitMinutes(Number(settings.AUTO_FORFEIT_GRACE_MINUTES));
         if (settings?.PLATFORM_FEE_PERCENTAGE) setFeePercentage(Number(settings.PLATFORM_FEE_PERCENTAGE));
         if (settings?.DISPUTE_IMAGE_RULES) setDisputeRules(settings.DISPUTE_IMAGE_RULES);
         if (settings?.DISPUTE_ACCEPTED_FORMATS) setAcceptedFormats(settings.DISPUTE_ACCEPTED_FORMATS);
@@ -36,6 +38,7 @@ export default function AdminSettingsPage() {
     try {
       await Promise.all([
         api.setMatchDuration(duration),
+        api.updateAdminSetting("AUTO_FORFEIT_GRACE_MINUTES", String(autoForfeitMinutes), "Grace period in minutes after match duration expires before auto-forfeit awards win to reporting player"),
         api.updateAdminSetting("PLATFORM_FEE_PERCENTAGE", String(feePercentage), "Global platform rake fee percentage deducted from match prize pools"),
         api.updateAdminSetting("DISPUTE_IMAGE_RULES", disputeRules, "Dispute evidence guidelines and acceptance criteria shown to players"),
         api.updateAdminSetting("DISPUTE_ACCEPTED_FORMATS", acceptedFormats, "Supported screenshot and video formats for disputes"),
@@ -147,6 +150,32 @@ export default function AdminSettingsPage() {
               className="h-11 w-24 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-center text-base font-black text-[#00FF66] focus:border-[#00FF66] focus:outline-none"
             />
             <span className="text-xs font-bold text-white uppercase tracking-wider">Minutes</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Automated Match Timer Forfeit Grace Period Setting Card */}
+      <div className="mb-6 rounded-lg border border-[#00FF66]/30 bg-[#14161a] p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-[#00FF66]" />
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">Automated Timer Forfeit Grace Period</h3>
+            </div>
+            <p className="mt-1 text-xs text-[#737883]">
+              If one player reports their score while their opponent is unresponsive, automatically forfeit the opponent and award the win after Match Duration + Grace Period (currently <span className="text-[#00FF66] font-bold">{duration + autoForfeitMinutes} minutes</span> total).
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              min={1}
+              max={60}
+              value={autoForfeitMinutes}
+              onChange={(e) => setAutoForfeitMinutes(Math.max(1, Math.min(60, parseInt(e.target.value) || 1)))}
+              className="h-11 w-24 rounded-lg border border-[#2b2e35] bg-[#0c0d10] px-3 text-center text-base font-black text-[#00FF66] focus:border-[#00FF66] focus:outline-none"
+            />
+            <span className="text-xs font-bold text-white uppercase tracking-wider">Grace Mins</span>
           </div>
         </div>
       </div>

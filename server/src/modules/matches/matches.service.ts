@@ -18,6 +18,7 @@ import {
   DisputeStatus,
 } from '../../entities/dispute.entity';
 import { PlatformSetting } from '../../entities/platform-setting.entity';
+import { MatchMessage } from '../../entities/match-message.entity';
 import {
   CreateMatchDto,
   SubmitScoreDto,
@@ -35,6 +36,8 @@ export class MatchesService {
     private readonly disputeRepository: Repository<MatchDispute>,
     @InjectRepository(PlatformSetting)
     private readonly platformSettingRepository: Repository<PlatformSetting>,
+    @InjectRepository(MatchMessage)
+    private readonly messageRepository: Repository<MatchMessage>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -164,6 +167,9 @@ export class MatchesService {
     if (!isUuid) {
       throw new NotFoundException('Match not found');
     }
+    // Check if match qualifies for automated forfeit timer expiration
+    await this.checkAndApplyAutoForfeit(matchId);
+
     const match = await this.matchRepository.findOne({
       where: { id: matchId },
       relations: ['creator', 'opponent', 'winner', 'dispute'],
@@ -575,6 +581,128 @@ export class MatchesService {
       throw err;
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  // --- Live In-Match Chat ---
+  async getMatchMessages(matchId: string) {
+    return this.messageRepository.find({
+      where: { match: { id: matchId } },
+      relations: ['sender'],
+      order: { createdAt: 'ASC' },
+      take: 100,
+    });
+  }
+
+  async sendMatchMessage(userId: string, matchId: string, content: string) {
+    if (!content || !content.trim()) {
+      throw new BadRequestException('Message content cannot be empty');
+    }
+
+    const match = await this.matchRepository.findOne({
+      where: { id: matchId },
+      relations: ['creator', 'opponent'],
+    });
+
+    if (!match) {
+      throw new NotFoundException('Match not found');
+    }
+
+    const isParticipant =
+      match.creator.id === userId || (match.opponent && match.opponent.id === userId);
+    if (!isParticipant) {
+      throw new BadRequestException('Only match participants can send messages in this room');
+    }
+
+    const sender = await this.userRepository.findOne({ where: { id: userId } });
+    if (!sender) {
+      throw new NotFoundException('User not found');
+    }
+
+    const msg = this.messageRepository.create({
+      match,
+      sender,
+      content: content.trim().slice(0, 500),
+    });
+
+    return this.messageRepository.save(msg);
+  }
+
+  // --- Automated Match Timer Forfeits ---
+  async checkAndApplyAutoForfeit(matchId: string) {
+    try {
+      const match = await this.matchRepository.findOne({
+        where: { id: matchId },
+        relations: ['creator', 'opponent'],
+      });
+
+      if (!match) return;
+
+      // Only evaluate if match is in progress or awaiting opponent result
+      if (
+        match.status !== MatchStatus.IN_PROGRESS &&
+        match.status !== MatchStatus.RESULT_PENDING
+      ) {
+        return;
+      }
+
+      // If both reported, resolution will occur via normal flow
+      if (match.creatorReportedScore && match.opponentReportedScore) {
+        return;
+      }
+
+      // If neither reported, cannot auto-forfeit to a single winner
+      if (!match.creatorReportedScore && !match.opponentReportedScore) {
+        return;
+      }
+
+      // Retrieve configured durations
+      let matchDurationMinutes = 6;
+      let forfeitGraceMinutes = 5;
+
+      try {
+        const matchDurSetting = await this.platformSettingRepository.findOne({
+          where: { key: 'DEFAULT_MATCH_DURATION_MINUTES' },
+        });
+        if (matchDurSetting && !isNaN(Number(matchDurSetting.value))) {
+          matchDurationMinutes = Number(matchDurSetting.value);
+        }
+
+        const graceSetting = await this.platformSettingRepository.findOne({
+          where: { key: 'AUTO_FORFEIT_GRACE_MINUTES' },
+        });
+        if (graceSetting && !isNaN(Number(graceSetting.value))) {
+          forfeitGraceMinutes = Number(graceSetting.value);
+        }
+      } catch (err) {
+        // use defaults
+      }
+
+      const totalAllowedMinutes = matchDurationMinutes + forfeitGraceMinutes;
+      const startTime = match.startedAt ? new Date(match.startedAt).getTime() : new Date(match.createdAt).getTime();
+      const elapsedMinutes = (Date.now() - startTime) / (1000 * 60);
+
+      // If timer has expired past match duration + forfeit grace period:
+      if (elapsedMinutes >= totalAllowedMinutes) {
+        // Exactly one player submitted their score. The unresponsive player forfeits.
+        let winnerId: string | null = null;
+        let forfeitedPlayerUsername = '';
+
+        if (match.creatorReportedScore && !match.opponentReportedScore) {
+          winnerId = match.creator.id;
+          forfeitedPlayerUsername = match.opponent?.username || 'Opponent';
+        } else if (match.opponentReportedScore && !match.creatorReportedScore) {
+          winnerId = match.opponent.id;
+          forfeitedPlayerUsername = match.creator.username;
+        }
+
+        if (winnerId) {
+          // Award win via payout
+          await this.settleMatch(matchId, winnerId);
+        }
+      }
+    } catch (e) {
+      console.error('Error during auto-forfeit check:', e);
     }
   }
 }

@@ -121,6 +121,7 @@ export class AdminService {
       DISPUTE_IMAGE_RULES: 'Clear in-game final whistle screenshot or recording showing final score, Konami ID/PSN/Gamertag, and match stats. Uncropped, unedited JPG/PNG only.',
       DISPUTE_ACCEPTED_FORMATS: 'JPG, PNG, WEBP (Max 10MB per image)',
       DEFAULT_MATCH_DURATION_MINUTES: String(AdminService.currentMatchDurationMinutes),
+      AUTO_FORFEIT_GRACE_MINUTES: '5',
     };
 
     settings.forEach((s) => {

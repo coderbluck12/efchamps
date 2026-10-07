@@ -462,6 +462,74 @@ export default function HomePage() {
             <p className="mt-3 text-[8px] text-[#515660]">No spam. Unsubscribe whenever the streak ends.</p>
           </div>
         </section>
+
+        {/* Paystack Merchant & Business Compliance Section */}
+        <section className="border-t border-[#292c32] py-16">
+          <div className="rounded-2xl border border-[#2b2f38] bg-gradient-to-b from-[#121419] to-[#0a0b0e] p-8 sm:p-12">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 pb-8 border-b border-[#22252c]">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="flex size-2 rounded-full bg-[#00FF66]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00FF66]">
+                    Licensed Software &amp; Esports Tournament Platform
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  Transparent, Skill-Based Competitive Gaming
+                </h2>
+                <p className="mt-3 text-xs leading-relaxed text-[#8b919e]">
+                  efChamps operates exclusively as a peer-to-peer esports tournament facilitation platform for eFootball™ players. Matches are 100% skill-based competitions where outcomes depend solely on participant ability, dexterity, and tactical football play. efChamps does not host games of chance or casino gambling.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="rounded-xl border border-[#2a2e37] bg-[#16181f] px-4 py-3 text-center min-w-[130px]">
+                  <p className="text-[9px] uppercase tracking-wider text-[#737883]">Payment Partner</p>
+                  <p className="mt-0.5 text-xs font-black text-[#00C3F8]">Paystack Secured</p>
+                </div>
+                <div className="rounded-xl border border-[#2a2e37] bg-[#16181f] px-4 py-3 text-center min-w-[130px]">
+                  <p className="text-[9px] uppercase tracking-wider text-[#737883]">Escrow Guarantee</p>
+                  <p className="mt-0.5 text-xs font-black text-[#00FF66]">100% Locked</p>
+                </div>
+                <div className="rounded-xl border border-[#2a2e37] bg-[#16181f] px-4 py-3 text-center min-w-[130px]">
+                  <p className="text-[9px] uppercase tracking-wider text-[#737883]">Payout Speed</p>
+                  <p className="mt-0.5 text-xs font-black text-white">Instant Transfer</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-white">
+                  <Icon name="shield" size={16} />
+                  <h4 className="text-xs font-black uppercase tracking-wider">Automated Wallet Escrow</h4>
+                </div>
+                <p className="text-[11px] leading-relaxed text-[#737883]">
+                  All match stakes are held in automated cryptographic escrow before kickoff. Funds cannot be seized or withdrawn until results are confirmed or independently verified by arbiters.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-white">
+                  <Icon name="wallet" size={16} />
+                  <h4 className="text-xs font-black uppercase tracking-wider">Transparent Fees &amp; Minimums</h4>
+                </div>
+                <p className="text-[11px] leading-relaxed text-[#737883]">
+                  Standard platform commission is capped at 10% per prize pool to support servers, live arbitrament, and tournament operations. Minimum deposit is fixed at ₦1,000 via official Paystack checkout.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-white">
+                  <Icon name="headset" size={16} />
+                  <h4 className="text-xs font-black uppercase tracking-wider">Customer Support &amp; Arbitration</h4>
+                </div>
+                <p className="text-[11px] leading-relaxed text-[#737883]">
+                  Dedicated live human arbitration resolves any disputed match score within minutes through tamper-proof screenshot validation. Contact us 24/7 at <span className="text-white font-mono">support@efchamps.com</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}

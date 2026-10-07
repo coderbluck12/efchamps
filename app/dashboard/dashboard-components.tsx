@@ -1266,7 +1266,12 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
                   }
                   setComplete(true);
                 } else if (type === "funds") {
-                  const amt = parseFloat(depositAmount || "2500");
+                  const amt = parseFloat(depositAmount || "1000");
+                  if (isNaN(amt) || amt < 1000) {
+                    alert("The least you can deposit is ₦1,000");
+                    setLoading(false);
+                    return;
+                  }
                   handlePaystackDeposit(amt);
                   return;
                 } else if (type === "withdraw") {
@@ -1306,10 +1311,16 @@ export function ActionModal({ type, onClose }: { type: ModalType; onClose: () =>
                   <Field 
                     label="Deposit Amount (₦)" 
                     name="amount" 
-                    placeholder="2500" 
+                    placeholder="1000" 
+                    type="number"
                     value={depositAmount}
                     onChange={(e: any) => setDepositAmount(e.target.value)} 
                   />
+                  {depositAmount && parseFloat(depositAmount) < 1000 && (
+                    <p className="text-[11px] font-bold text-red-400 -mt-2">
+                      ⚠️ The least you can deposit is ₦1,000
+                    </p>
+                  )}
                   <div className="grid grid-cols-4 gap-2">
                     {["1000", "2500", "5000", "10000"].map((amount) => (
                       <button 

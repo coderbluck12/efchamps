@@ -37,6 +37,10 @@ export class WalletService {
   }
 
   async deposit(userId: string, dto: DepositDto) {
+    if (Number(dto.amount) < 1000) {
+      throw new BadRequestException('The least you can deposit is ₦1,000');
+    }
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -97,6 +101,10 @@ export class WalletService {
     } else {
       // Use exact amount requested by the user, fallback to 2500 only if undefined
       verifiedAmount = fallbackAmount ? Number(fallbackAmount) : 2500;
+    }
+
+    if (verifiedAmount < 1000) {
+      throw new BadRequestException('The least you can deposit is ₦1,000');
     }
 
     // Check if reference was already credited

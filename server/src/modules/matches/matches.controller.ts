@@ -125,5 +125,21 @@ export class MatchesController {
   ) {
     return this.matchesService.cancelMatch(req.user.sub, matchId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/messages')
+  getMatchMessages(@Param('id') matchId: string) {
+    return this.matchesService.getMatchMessages(matchId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/messages')
+  sendMatchMessage(
+    @Request() req: any,
+    @Param('id') matchId: string,
+    @Body('content') content: string,
+  ) {
+    return this.matchesService.sendMatchMessage(req.user.sub, matchId, content);
+  }
 }
 
