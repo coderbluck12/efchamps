@@ -144,4 +144,24 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ userId, role }),
     }),
+  adminCancelMatch: (matchId: string) =>
+    apiRequest('/admin/cancel-match', {
+      method: 'POST',
+      body: JSON.stringify({ matchId }),
+    }),
+  adminDeleteMatch: (matchId: string) =>
+    apiRequest('/admin/delete-match', {
+      method: 'POST',
+      body: JSON.stringify({ matchId }),
+    }),
+  adminCancelTournament: (tournamentId: string) =>
+    apiRequest('/admin/cancel-tournament', {
+      method: 'POST',
+      body: JSON.stringify({ tournamentId }),
+    }),
+  adminDeleteTournament: (tournamentId: string) =>
+    apiRequest('/admin/delete-tournament', {
+      method: 'POST',
+      body: JSON.stringify({ tournamentId }),
+    }),
 };

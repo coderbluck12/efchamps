@@ -52,4 +52,24 @@ export class AdminController {
   updateUserRole(@Body() body: { userId: string; role: string }) {
     return this.adminService.updateUserRole(body.userId, body.role);
   }
+
+  @Post('cancel-match')
+  cancelMatch(@Body('matchId') matchId: string) {
+    return this.adminService.adminCancelMatch(matchId);
+  }
+
+  @Post('delete-match')
+  deleteMatch(@Body('matchId') matchId: string) {
+    return this.adminService.adminDeleteMatch(matchId);
+  }
+
+  @Post('cancel-tournament')
+  cancelTournament(@Body('tournamentId') tournamentId: string) {
+    return this.adminService.adminCancelTournament(tournamentId);
+  }
+
+  @Post('delete-tournament')
+  deleteTournament(@Body('tournamentId') tournamentId: string) {
+    return this.adminService.adminDeleteTournament(tournamentId);
+  }
 }
